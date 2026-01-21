@@ -10,7 +10,7 @@ export type MaterialName =
   | '튼튼한 목재'
   | '벌목의 가루';
 
-export type CraftableItem = '아비도스 융화재료' | '상급 아비도스 융화재료';
+export type CraftableItem = '아비도스 융화 재료' | '상급 아비도스 융화 재료';
 
 export interface Recipe {
   name: CraftableItem;

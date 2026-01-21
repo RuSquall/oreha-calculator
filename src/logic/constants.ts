@@ -9,7 +9,7 @@ export interface ExchangeRecipe {
 
 export const RECIPES: Recipe[] = [
   {
-    name: '상급 아비도스 융화재료',
+    name: '상급 아비도스 융화 재료',
     gold: 520,
     materials: {
       '아비도스 목재': 43,
@@ -18,7 +18,7 @@ export const RECIPES: Recipe[] = [
     },
   },
   {
-    name: '아비도스 융화재료',
+    name: '아비도스 융화 재료',
     gold: 400,
     materials: {
       '아비도스 목재': 33,
