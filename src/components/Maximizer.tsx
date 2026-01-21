@@ -9,8 +9,6 @@ const getImagePath = (itemName: string): string => {
   const fileName = itemName.replace(/ /g, '_');
   return `/${fileName}.png`;
 };
-import { MATERIAL_NAMES, RECIPES } from '../logic/constants';
-import { calculateMaxCrafts } from '../logic/maximizer';
 
 const Maximizer = () => {
   const [inventory, setInventory] = useState<Inventory>(
