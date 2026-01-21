@@ -2,14 +2,14 @@ import type { Handler } from "@netlify/functions";
 
 // 조회할 아이템 목록과 속성을 체계적으로 관리
 const ITEMS_TO_FETCH = [
-  // 원재료
-  { name: '아비도스 목재', categoryCode: 50000, minQuantity: 100 },
-  { name: '부드러운 목재', categoryCode: 50000, minQuantity: 100 },
-  { name: '목재', categoryCode: 50000, minQuantity: 100 },
-  { name: '튼튼한 목재', categoryCode: 50000, minQuantity: 100 },
-  // 융화재료 (제작 재료 카테고리)
-  { name: '상급 아비도스 융화재료', categoryCode: 200000, minQuantity: 10 },
-  { name: '아비도스 융화재료', categoryCode: 200000, minQuantity: 10 },
+  // 원재료 (CategoryCode: 90300)
+  { name: '목재', categoryCode: 90300, minQuantity: 100 },
+  { name: '부드러운 목재', categoryCode: 90300, minQuantity: 100 },
+  { name: '튼튼한 목재', categoryCode: 90300, minQuantity: 100 },
+  { name: '아비도스 목재', categoryCode: 90300, minQuantity: 100 },
+  // 융화재료 (CategoryCode: 50010, ItemName에 띄어쓰기 주의)
+  { name: '아비도스 융화 재료', categoryCode: 50010, minQuantity: 10 },
+  { name: '상급 아비도스 융화 재료', categoryCode: 50010, minQuantity: 10 },
 ];
 
 // 개별 아이템의 가격을 로스트아크 API를 통해 가져오는 헬퍼 함수
