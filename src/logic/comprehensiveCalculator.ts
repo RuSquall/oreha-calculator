@@ -19,6 +19,7 @@ export const analyzeComprehensiveProfit = (
   targetItemName: CraftableItem
 ): ComprehensiveAnalysisResult => {
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const effectiveCosts = getEffectiveCosts(pricesPer100);
   const recipe = RECIPES.find(r => r.name === targetItemName);
   if (!recipe) {
