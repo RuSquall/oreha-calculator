@@ -1,6 +1,7 @@
 # Netlify 설정 파일
 
 [functions]
+  node_bundler = "esbuild" # Functions v2 환경 명시
   # 'updatePrices' 함수를 1분마다 실행하도록 설정
   [functions."updatePrices"]
     schedule = "* * * * *"
