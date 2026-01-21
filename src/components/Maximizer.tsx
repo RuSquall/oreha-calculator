@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Button, Card, Row, Col, Alert } from 'react-bootstrap';
-import { MaterialName, CraftableItem, MaximizerResult, Inventory } from '../types/data';
+import { MaterialName, MaximizerResult, Inventory } from '../types/data';
 import { MATERIAL_NAMES, RECIPES } from '../logic/constants';
 import { calculateMaxCrafts } from '../logic/maximizer';
 
