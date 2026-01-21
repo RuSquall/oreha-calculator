@@ -1,5 +1,5 @@
 import type { Handler } from "@netlify/functions";
-import { getStore } from "@netlify/blobs/server";
+import { getStore } from "@netlify/blobs";
 
 export const handler: Handler = async () => {
   try {

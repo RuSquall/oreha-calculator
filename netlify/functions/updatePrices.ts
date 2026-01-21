@@ -1,5 +1,5 @@
 import type { Handler } from "@netlify/functions";
-import { getStore } from "@netlify/blobs/server";
+import { getStore } from "@netlify/blobs";
 
 // 조회할 아이템 목록과 속성을 체계적으로 관리
 const ITEMS_TO_FETCH = [
