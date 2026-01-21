@@ -1,0 +1,92 @@
+## 작업 일지: 로스트아크 융화재료 계산기 개발 기록
+
+### 1. 프로젝트 초기 분석 및 이해
+
+*   **2026년 1월 18일 작업 요약 (`session_summary.txt` 기반):**
+    *   React + TypeScript 기반의 로스트아크 융화재료 계산기 프로젝트.
+    *   비용 최적화, 최대 생산량, 종합 분석 3가지 주요 기능.
+    *   `src/types/data.ts`, `src/logic/constants.ts` 등 데이터 및 로직 분리 잘 되어 있음.
+    *   `calculator.ts`는 반복 계산을 통해 유효 비용 도출, `maximizer.ts`는 브루트포스 방식으로 최대 생산량 계산.
+    *   '벌목의 가루' 구매 불가 처리, 재료 교환 방식(`DISCRETE_EXCHANGES`) 등 게임 특화 로직 구현 확인.
+*   **'아비도스 목재' 획득 방법 분석:**
+    *   경매장에서 직접 구매 가능.
+    *   '벌목의 가루' 100개 → '아비도스 목재' 10개 교환 가능.
+*   **재료별 가치 및 교환비 분석:**
+    *   '목재'를 기준(가치 1)으로 '튼튼한 목재'(10), '부드러운 목재'(2), '아비도스 목재'(12.5)의 상대적 가치 도출.
+    *   `DISCRETE_EXCHANGES`에 정의된 모든 교환 비율 정리.
+*   **최적 구매 로직 확인:**
+    *   현재 로직(`calculator.ts`)이 시장 가격 변동에 따라 직접 구매와 교환 중 최적의 방법을 찾아주는 기능이 있음을 확인.
+    *   예시 시세(목재 63, 부드러운 목재 130 등)를 기반으로 '아비도스 목재'는 '목재'를 통한 교환이 더 효율적임을 분석.
+    *   분석 내용을 `efficient_exchange_analysis.txt` 파일로 저장.
+
+### 2. 로스트아크 API 연동 및 백엔드 아키텍처 구축 (Upstash Redis 기반)
+
+*   **API 키 발급 안내:** 로스트아크 개발자 포털에서 API 키(JWT) 발급 및 Netlify 환경 변수 설정(`LOSTARK_API_KEY`) 방법 안내.
+*   **새로운 아키텍처 제안:**
+    *   Netlify Functions (스케줄링된 함수)를 사용하여 로스트아크 API에서 주기적으로 시세를 가져옴.
+    *   가져온 시세를 Upstash Redis에 캐싱.
+    *   프론트엔드는 Netlify Functions (API 함수)를 통해 캐시된 시세를 읽어옴.
+    *   **Upstash Redis 채택:** Netlify Blobs가 기업용 플랜 전용임을 확인 후, 무료 티어를 제공하는 Upstash Redis로 대체 결정.
+*   **`netlify.toml` 설정:**
+    *   `node_bundler = "esbuild"` 추가하여 Functions v2 환경 명시.
+    *   `updatePrices` 함수를 1분마다 실행하도록 스케줄링 (`* * * * *`).
+*   **`updatePrices.ts` 구현:**
+    *   로스트아크 API에서 가격 가져오는 로직 구현.
+    *   **'스마트 최저가' 로직 적용:** `TradeRemainCount`가 `null`이므로 `CurrentMinPrice`를 사용하도록 폴백.
+    *   **`CategoryCode` 및 `ItemName` 오류 수정:**
+        *   원재료 `CategoryCode`: `50000` → `90300`으로 수정.
+        *   융화재료 `CategoryCode`: `200000` → `50010`으로 수정.
+        *   융화재료 `ItemName`: 띄어쓰기 없는 이름 → 띄어쓰기 있는 이름으로 수정 (예: '아비도스 융화재료' → '아비도스 융화 재료').
+    *   Upstash Redis에 가격 데이터 `SET`하는 로직 추가.
+*   **`getPrices.ts` 구현:**
+    *   Upstash Redis에서 가격 데이터 `GET`하는 로직 추가.
+*   **환경 변수:** `UPSTASH_REDIS_URL`, `UPSTASH_REDIS_TOKEN` 설정 방법 안내.
+*   **`ioredis` 설치:** `npm install ioredis` 명령으로 Redis 클라이언트 라이브러리 설치 및 `package.json` 업데이트.
+
+### 3. 프론트엔드 UI/UX 개선
+
+*   **`App.tsx`:**
+    *   모든 계산기를 한 화면에 표시하려던 시도 후, 사용자 요청에 따라 원래의 탭 구조로 롤백.
+*   **`Calculator.tsx`:**
+    *   `targetItem` 선택(라디오 버튼) 제거.
+    *   '수익성 분석' 시 '상급 아비도스 융화 재료'와 '아비도스 융화 재료' 두 가지 모두에 대한 분석 결과를 동시에 표시.
+    *   '융화재료 시장 가격' 입력 필드를 각 융화재료별로 분리하여 입력 가능하도록 수정.
+    *   API 연동 및 로딩/에러/업데이트 시간 UI 추가.
+*   **`ComprehensiveCalculator.tsx`:**
+    *   `targetItem` 선택(라디오 버튼) 제거.
+    *   '종합 분석' 시 '상급 아비도스 융화 재료'와 '아비도스 융화 재료' 두 가지 모두에 대한 분석 결과를 동시에 표시.
+    *   '융화재료 시장 가격' 입력 필드를 각 융화재료별로 분리하여 입력 가능하도록 수정.
+    *   API 연동 및 로딩/에러/업데이트 시간 UI 추가.
+*   **`Maximizer.tsx`:**
+    *   `targetItem` 선택(라디오 버튼) 제거.
+    *   '최대 생산량 계산' 시 '상급 아비도스 융화 재료'와 '아비도스 융화 재료' 두 가지 모두에 대한 최대 생산량 결과를 동시에 표시.
+    *   시세 정보는 사용하지 않으므로 API 연동 불필요 확인.
+
+### 4. 코드 품질 개선
+
+*   **`src/logic/utils.ts` 생성:**
+    *   `getEffectiveCosts` 함수를 공통 유틸리티로 분리하여 `calculator.ts`와 `comprehensiveCalculator.ts`의 중복 코드 제거.
+*   **`calculator.ts`, `comprehensiveCalculator.ts` 수정:** `utils.ts`의 `getEffectiveCosts` 함수를 사용하도록 변경.
+
+### 5. 빌드 및 배포 문제 해결
+
+*   **ESLint 오류 해결:**
+    *   `src/components/Maximizer.tsx`: `CraftableItem` 미사용 import 제거.
+    *   `src/logic/comprehensiveCalculator.ts`: `effectiveCosts` 변수 미사용 경고에 ESLint 지시문 추가.
+*   **`@netlify/blobs` 모듈 해결:**
+    *   `package.json`에 `@netlify/blobs` 수동 추가.
+    *   `@netlify/blobs` API 변경 확인 후 `context.blobs` 사용 방식으로 코드 수정.
+    *   **최종 진단:** Netlify Blobs는 기업용 플랜 전용임을 확인.
+*   **`ioredis` 모듈 해결:**
+    *   `package.json`에 `ioredis` 수동 추가.
+    *   `@types/ioredis` 설치 (TypeScript 사용 시 필요).
+
+---
+
+**현재 상태:**
+
+*   로스트아크 API에서 실시간 시세를 가져와 Upstash Redis에 캐싱하고, 프론트엔드에서 이를 활용하는 전체 데이터 파이프라인이 성공적으로 구축 및 연동되었습니다.
+*   모든 계산기에서 융화재료 두 종류에 대한 동시 분석 및 비교가 가능하도록 UI/UX가 개선되었습니다.
+*   코드 품질 개선(리팩토링) 및 빌드 관련 문제 해결이 완료되었습니다.
+
+이제 남은 작업은 웹사이트의 완성도를 높이는 마무리 작업들입니다.
