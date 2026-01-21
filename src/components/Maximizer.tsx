@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Form, Button, Card, Row, Col, Alert } from 'react-bootstrap';
+import { MaterialName, MaximizerResult, Inventory } from '../types/data';
+import { MATERIAL_NAMES, RECIPES } from '../logic/constants';
+import { calculateMaxCrafts } from '../logic/maximizer';
+
 const getImagePath = (itemName: string): string => {
   // 파일명 규칙에 따라 공백을 언더스코어로 변경
   const fileName = itemName.replace(/ /g, '_');
   return `/${fileName}.png`;
 };
-
-import { MaterialName, MaximizerResult, Inventory } from '../types/data';
 import { MATERIAL_NAMES, RECIPES } from '../logic/constants';
 import { calculateMaxCrafts } from '../logic/maximizer';
 
