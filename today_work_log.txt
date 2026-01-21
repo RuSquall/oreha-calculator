@@ -8,7 +8,7 @@
 
 **[10:00 AM] 로스트아크 API 연동 및 백엔드 아키텍처 논의**
 *   로스트아크 경매장 API를 통한 실시간 가격 연동 방법 문의에 대해 API 키 발급, 엔드포인트(`POST /markets/items`), 요청/응답 구조 등 기본 사용법 설명.
-*   프론트엔드 소스 코드 노출 및 API 키 보안 문제 제기. Netlify Functions를 활용한 백엔드 프록시 아키텍처 제안.
+*   프론트엔드 소스 코드 노출 및 API 키 보안 문제 제기. Netlify Functions를 통한 백엔드 프록시 아키텍처 제안.
 *   API 호출 빈도(1분/10분)에 대한 논의 후 1분 간격으로 결정.
 *   최저가 물량의 왜곡 문제(소량 미끼 매물)에 대한 '스마트 최저가' 로직 도입 논의.
 
@@ -52,3 +52,15 @@
 *   `updatePrices` 함수가 로스트아크 API에서 가격을 성공적으로 가져와 Upstash Redis에 저장하고 있음을 확인.
 *   프론트엔드에서 융화재료 가격이 정상적으로 미리 채워지고 있음을 확인.
 *   Upstash Redis 환경 변수(`UPSTASH_REDIS_URL`, `UPSTASH_REDIS_TOKEN`) 설정 방법 안내.
+
+**[최근 작업: 이미지 통합 및 등급별 스타일 적용]**
+*   **재료 이미지 통합:**
+    *   이미지 파일 위치 확인 (`public` 폴더 내).
+    *   `getImagePath` 헬퍼 함수를 `Calculator.tsx`, `ComprehensiveCalculator.tsx`, `Maximizer.tsx`에 추가.
+    *   세 계산기의 입력 필드 및 결과에 재료 이미지(`<img>` 태그) 통합.
+*   **등급별 배경 스타일 적용:**
+    *   `src/logic/grades.ts` 파일 생성 및 등급-색상, 재료-등급 매핑, `getItemGradeStyle` 헬퍼 함수 정의.
+    *   `Calculator.tsx`, `ComprehensiveCalculator.tsx`, `Maximizer.tsx`에 `getItemGradeStyle` import.
+    *   세 계산기의 입력 필드 및 결과에 등급별 배경 스타일 적용.
+*   **빌드 오류 해결:**
+    *   `src/components/Maximizer.tsx`의 중복 import 문 오류 수정.

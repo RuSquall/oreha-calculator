@@ -3,6 +3,7 @@ import { Form, Button, Card, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { MaterialName, CraftableItem, ProfitAnalysisResult } from '../types/data';
 import { PURCHASABLE_MATERIALS, RECIPES } from '../logic/constants';
 import { analyzeCraftingProfit } from '../logic/calculator';
+import { getItemGradeStyle } from '../logic/grades';
 
 const getImagePath = (itemName: string): string => {
   // 파일명 규칙에 따라 공백을 언더스코어로 변경
@@ -114,8 +115,10 @@ const Calculator = () => {
                 <Col md={6} key={name}>
                   <Form.Group className="mb-3" controlId={`price-${name}`}>
                     <Form.Label>
-                      <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
-                      {name}
+                      <span style={getItemGradeStyle(name)}>
+                        <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
+                        {name}
+                      </span>
                     </Form.Label>
                     <Form.Control
                       type="number"
@@ -153,8 +156,10 @@ const Calculator = () => {
                 <Col md={6} key={`fusionPrice-${recipe.name}`}>
                   <Form.Group className="mb-3" controlId={`fusionPrice-${recipe.name}`}>
                     <Form.Label>
-                      <img src={getImagePath(recipe.name)} alt={recipe.name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
-                      {recipe.name} 시장 가격 (1개당)
+                      <span style={getItemGradeStyle(recipe.name)}>
+                        <img src={getImagePath(recipe.name)} alt={recipe.name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
+                        {recipe.name} 시장 가격 (1개당)
+                      </span>
                     </Form.Label>
                     <Form.Control
                       type="number"
@@ -207,8 +212,10 @@ const Calculator = () => {
               <ul>
                 {result.materialCostBreakdown?.map((item, matIndex) => (
                   <li key={matIndex} className="small text-muted">
-                    <img src={getImagePath(item.name)} alt={item.name} style={{ width: '20px', height: '20px', marginRight: '5px' }} />
-                    {item.name}: {item.requiredAmount}개 (단가: {item.unitCost.toLocaleString()} 골드, 총: {item.totalCost.toLocaleString()} 골드) - {item.source}
+                    <span style={getItemGradeStyle(item.name)}>
+                      <img src={getImagePath(item.name)} alt={item.name} style={{ width: '20px', height: '20px', marginRight: '5px' }} />
+                      {item.name}
+                    </span>: {item.requiredAmount}개 (단가: {item.unitCost.toLocaleString()} 골드, 총: {item.totalCost.toLocaleString()} 골드) - {item.source}
                   </li>
                 ))}
               </ul>

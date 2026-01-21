@@ -3,6 +3,7 @@ import { Form, Button, Card, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { MaterialName, CraftableItem, Inventory, ComprehensiveAnalysisResult } from '../types/data';
 import { MATERIAL_NAMES, PURCHASABLE_MATERIALS, RECIPES } from '../logic/constants';
 import { analyzeComprehensiveProfit } from '../logic/comprehensiveCalculator';
+import { getItemGradeStyle } from '../logic/grades';
 
 const getImagePath = (itemName: string): string => {
   // 파일명 규칙에 따라 공백을 언더스코어로 변경
@@ -111,8 +112,10 @@ const ComprehensiveCalculator = () => {
               <Col md={6} key={`inv-${name}`}>
                   <Form.Group className="mb-3" controlId={`inventory-${name}`}>
                     <Form.Label>
-                      <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
-                      {name}
+                      <span style={getItemGradeStyle(name)}>
+                        <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
+                        {name}
+                      </span>
                     </Form.Label>
                     <Form.Control
                     type="number"
@@ -147,8 +150,10 @@ const ComprehensiveCalculator = () => {
                 <Col md={6} key={`price-${name}`}>
                   <Form.Group className="mb-3" controlId={`price-${name}`}>
                     <Form.Label>
-                      <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
-                      {name}
+                      <span style={getItemGradeStyle(name)}>
+                        <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
+                        {name}
+                      </span>
                     </Form.Label>
                     <Form.Control
                     type="number"
@@ -186,8 +191,10 @@ const ComprehensiveCalculator = () => {
               <Col md={6} key={`fusionPrice-${recipe.name}`}>
                 <Form.Group className="mb-3" controlId={`fusionPrice-${recipe.name}`}>
                   <Form.Label>
-                    <img src={getImagePath(recipe.name)} alt={recipe.name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
-                    {recipe.name} 시장 가격 (1개당)
+                    <span style={getItemGradeStyle(recipe.name)}>
+                      <img src={getImagePath(recipe.name)} alt={recipe.name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
+                      {recipe.name} 시장 가격 (1개당)
+                    </span>
                   </Form.Label>
                   <Form.Control
                     type="number"

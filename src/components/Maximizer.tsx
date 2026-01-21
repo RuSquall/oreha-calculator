@@ -3,6 +3,7 @@ import { Form, Button, Card, Row, Col, Alert } from 'react-bootstrap';
 import { MaterialName, MaximizerResult, Inventory } from '../types/data';
 import { MATERIAL_NAMES, RECIPES } from '../logic/constants';
 import { calculateMaxCrafts } from '../logic/maximizer';
+import { getItemGradeStyle } from '../logic/grades';
 
 const getImagePath = (itemName: string): string => {
   // 파일명 규칙에 따라 공백을 언더스코어로 변경
@@ -41,8 +42,10 @@ const Maximizer = () => {
               <Col md={6} key={name}>
                 <Form.Group className="mb-3" controlId={`inventory-${name}`}>
                   <Form.Label>
-                    <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
-                    {name}
+                    <span style={getItemGradeStyle(name)}>
+                      <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
+                      {name}
+                    </span>
                   </Form.Label>
                   <Form.Control
                     type="number"
@@ -85,8 +88,10 @@ const Maximizer = () => {
             <ul>
               {MATERIAL_NAMES.map(name => (
                 <li key={`remaining-${name}`}>
-                  <img src={getImagePath(name)} alt={name} style={{ width: '20px', height: '20px', marginRight: '5px' }} />
-                  {name}: {Math.floor(result.remainingInventory[name]).toLocaleString()}개
+                  <span style={getItemGradeStyle(name)}>
+                    <img src={getImagePath(name)} alt={name} style={{ width: '20px', height: '20px', marginRight: '5px' }} />
+                    {name}
+                  </span>: {Math.floor(result.remainingInventory[name]).toLocaleString()}개
                 </li>
               ))}
             </ul>
