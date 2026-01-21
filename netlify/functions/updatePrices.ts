@@ -19,6 +19,15 @@ const fetchPriceFromLostArk = async (
   minQuantity: number,
   apiKey: string
 ): Promise<number | null> => {
+  const requestBody = {
+    Sort: 'CURRENT_MIN_PRICE',
+    CategoryCode: categoryCode,
+    ItemName: itemName,
+    PageNo: 1,
+    SortCondition: 'ASC',
+  };
+  console.log(`[${itemName}] Requesting with body:`, JSON.stringify(requestBody));
+
   try {
     const response = await fetch('https://developer-lostark.game.onstove.com/markets/items', {
       method: 'POST',
@@ -27,44 +36,42 @@ const fetchPriceFromLostArk = async (
         'Content-Type': 'application/json',
         'Authorization': `bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        Sort: 'CURRENT_MIN_PRICE',
-        CategoryCode: categoryCode,
-        ItemName: itemName,
-        PageNo: 1,
-        SortCondition: 'ASC',
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
-      console.error(`API error for ${itemName}: ${response.status} ${response.statusText}`);
+      console.error(`[${itemName}] API error: Status ${response.status}, Text: ${response.statusText}`);
+      const errorBody = await response.text();
+      console.error(`[${itemName}] API error body: ${errorBody}`);
       return null;
     }
 
     const data = await response.json();
+    console.log(`[${itemName}] API response data:`, JSON.stringify(data));
+
     if (data.Items && data.Items.length > 0) {
       const smartListing = data.Items.find(item => item.TradeRemainCount >= minQuantity);
       let effectivePrice;
 
       if (smartListing) {
         effectivePrice = smartListing.CurrentMinPrice;
+        console.log(`[${itemName}] Smart price found (qty >= ${minQuantity}): ${effectivePrice}`);
       } else {
         effectivePrice = data.Items[0].CurrentMinPrice;
+        console.log(`[${itemName}] No smart price, falling back to min price: ${effectivePrice}`);
       }
       
-      // 융화재료는 1개당, 원재료는 100개당 가격으로 UI/로직에서 사용될 것을 가정.
-      // 여기서는 API가 반환하는 '개당' 가격을 그대로 반환하고, 사용하는 쪽에서 조정하도록 변경.
-      // -> 다시 생각해보니, 저장 데이터의 단위를 통일하는 것이 좋음.
-      //    원재료는 100개당, 융화재료는 1개당 가격으로 저장.
       if (categoryCode === 50000) { // 원재료
         return effectivePrice * 100;
       }
       // 융화재료
       return effectivePrice;
+    } else {
+      console.warn(`[${itemName}] No items found in API response.`);
     }
     return null;
-  } catch (error) {
-    console.error(`Failed to fetch price for ${itemName}:`, error);
+  } catch (error: any) {
+    console.error(`[${itemName}] Failed to fetch price:`, error.message || error);
     return null;
   }
 };
