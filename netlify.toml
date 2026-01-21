@@ -1,0 +1,6 @@
+# Netlify 설정 파일
+
+[functions]
+  # 'updatePrices' 함수를 1분마다 실행하도록 설정
+  [functions."updatePrices"]
+    schedule = "* * * * *"

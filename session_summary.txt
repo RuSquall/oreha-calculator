@@ -1,0 +1,83 @@
+## 2026년 1월 18일 작업 요약 및 로직 상세
+
+### 1. 프로젝트 초기 설정 및 기본 구조
+
+*   **프로젝트 생성:** `create-react-app oreha-calculator --template typescript` 명령어를 사용하여 React 프로젝트를 생성하고, `bootstrap` 및 `react-bootstrap`을 설치하여 UI 기본 환경을 구축했습니다.
+*   **기본 컴포넌트:**
+    *   `App.tsx`: 메인 레이아웃 및 탭 구조 (비용 최적화, 최대 생산량, 종합 분석)
+    *   `Calculator.tsx`: 비용 최적화 계산기 UI
+    *   `Maximizer.tsx`: 최대 생산량 계산기 UI
+    *   `ComprehensiveCalculator.tsx`: 종합 분석 계산기 UI (신규 추가)
+*   **데이터 및 로직 분리:**
+    *   `src/types/data.ts`: 모든 데이터 타입 정의 (MaterialName, CraftableItem, Recipe, MaximizerResult, ProfitAnalysisResult, ComprehensiveAnalysisResult, Inventory, MaterialCostDetail, ExchangeRecipe)
+    *   `src/logic/constants.ts`: 레시피, 재료 이름, 구매 가능 재료 목록, 묶음 교환 규칙(`DISCRETE_EXCHANGES`) 등 상수 정의
+    *   `src/logic/calculator.ts`: 비용 최적화 분석 로직
+    *   `src/logic/maximizer.ts`: 최대 생산량 계산 로직
+    *   `src/logic/comprehensiveCalculator.ts`: 종합 분석 로직 (신규 추가)
+
+### 2. 주요 기능 구현 및 버그 수정 상세
+
+#### 2.1. 초기 설정 및 타입 오류 수정
+
+*   **문제:** `create-react-app` 기본 파일(`reportWebVitals.ts`, `App.css`, `logo.svg`, `App.test.tsx`, `setupTests.ts`) 삭제 후 `index.tsx`에서 `reportWebVitals` 임포트 오류 발생. `CalculationResult` 타입의 `steps` 필드에 '오류' 키 사용 불가.
+*   **해결:**
+    *   `index.tsx`에서 `reportWebVitals` 관련 코드 제거.
+    *   `src/types/data.ts`에서 `CalculationResult`의 `steps` 타입을 `{[key: string]: string;}`으로 변경하여 유연성 확보.
+    *   불필요한 기본 파일들 삭제 (`rm` 또는 `del` 명령어 사용).
+
+#### 2.2. '벌목의 가루' 구매 불가 처리
+
+*   **문제:** '벌목의 가루'는 구매할 수 없는 재료임에도 가격 입력 필드가 존재하고 로직에서 구매 가능으로 처리됨.
+*   **해결:**
+    *   `src/logic/constants.ts`에 `PURCHASABLE_MATERIALS` 배열을 추가하여 '벌목의 가루'를 제외.
+    *   `Calculator.tsx`에서 `PURCHASABLE_MATERIALS`를 사용하여 가격 입력 필드를 렌더링하도록 수정.
+    *   `src/logic/calculator.ts`에서 '벌목의 가루'의 초기 `effectiveCosts`를 `Infinity`로 설정하여 구매 불가 처리.
+
+#### 2.3. 최대 생산량 계산기 (`maximizer.ts`) 로직 개선 (다수 반복)
+
+*   **초기 문제:** 재료 교환 시 소수점 단위 계산, 무한 재귀, 비효율적인 재료 수급 방식 등으로 인해 정확한 최대 생산량 계산 불가.
+*   **해결:**
+    *   **묶음 교환 방식 도입:** `DISCRETE_EXCHANGES` 상수를 정의하여 모든 교환을 정수 단위의 묶음으로 처리. (`src/logic/constants.ts`로 이동)
+    *   **재귀 로직 개선 (실패):** 초기 재귀 `gather` 함수는 순환 참조 및 복합적인 재료 수급 문제로 인해 실패.
+    *   **전체 탐색(Brute-force) 로직 도입:** 사용자 제공 `ex.txt` 파일 분석 후, 가능한 모든 교환 조합을 탐색하여 최적의 결과를 찾는 **2단계 최적화(Two-stage Optimization)** 방식의 Brute-force 알고리즘으로 `src/logic/maximizer.ts`를 전면 재작성.
+        *   `maxCrafts` (총 단일 아이템 개수)를 계산.
+        *   `stage1Crafts` (일부 교환 후 제작)와 `stage2Crafts` (나머지 교환 후 추가 제작)를 합산하여 `totalCrafts` 계산.
+        *   `Math.floor(crafts / 10) * 10`을 통해 항상 10의 배수로 제작 횟수를 보정.
+    *   **UI 표시 수정:** `Maximizer.tsx`에서 `maxCrafts`를 '회'와 '개' 단위로 함께 표시하도록 변경.
+
+#### 2.4. 비용 최적화 계산기 (`calculator.ts`) 로직 개선
+
+*   **문제:**
+    *   재료 가격 입력 단위: '1개당' -> '100개당'으로 변경 필요.
+    *   융화재료 시장 가격 입력 단위: '10개당' -> '1개당'으로 변경 필요.
+    *   새로운 분석 목표: 재료 직접 판매, 제작 후 판매, 직접 사용 세 가지 시나리오 비교 분석 필요.
+    *   판매 수수료 계산 방식: 5% 고정이 아닌 '5% 후 올림' 방식으로 변경 필요.
+*   **해결:**
+    *   **UI 변경 (`Calculator.tsx`):**
+        *   재료 가격 입력 필드 레이블을 "100개당"으로 변경.
+        *   '제작 수수료 감소율(%)', '융화재료 시장 가격(1개당)' 입력 필드 추가.
+        *   결과 표시 영역을 새로운 분석 결과(`ProfitAnalysisResult`)에 맞춰 전면 개편.
+    *   **타입 정의 (`data.ts`):** `ProfitAnalysisResult` 및 `MaterialCostDetail` 인터페이스 추가.
+    *   **로직 변경 (`calculator.ts`):**
+        *   함수명을 `calculateOptimalCost`에서 `analyzeCraftingProfit`으로 변경.
+        *   입력 가격을 100으로 나누어 1개당 가격으로 변환하여 `effectiveCosts` 계산.
+        *   `effectiveCosts` 계산 반복 횟수를 50회로 늘려 수렴 안정성 확보.
+        *   `calculateUnitSalesFee` 헬퍼 함수를 도입하여 '5% 후 올림' 수수료 계산 로직 구현.
+        *   '재료 직접 판매 시 가치', '제작 후 판매 시 예상 수익', '직접 사용 시 절약 비용'을 계산.
+        *   세 가지 시나리오를 비교하여 최적의 추천을 제공.
+        *   `materialCostBreakdown` 필드를 채워 각 재료별 최적 수급 방법 및 비용 상세 내역 제공.
+
+#### 2.5. 종합 분석 계산기 (`comprehensiveCalculator.ts`) 신규 추가
+
+*   **목표:** 특정 재고를 가지고 있을 때, 모든 재료를 판매하는 경우, 최대 제작 후 판매하는 경우, 최대 제작 후 사용하는 경우의 총 가치를 비교 분석.
+*   **해결:**
+    *   **타입 정의 (`data.ts`):** `ComprehensiveAnalysisResult` 인터페이스 추가.
+    *   **로직 구현 (`comprehensiveCalculator.ts`):**
+        *   `getEffectiveCosts` 함수를 재활용하여 재료별 유효 비용 계산.
+        *   `calculateMaxCrafts` 함수를 호출하여 최대 제작 가능 수량 및 남는 재고 파악.
+        *   세 가지 시나리오(`totalValueSellAll`, `totalValueCraftSell`, `totalValueCraftUse`)의 총 가치를 계산.
+        *   최적의 시나리오를 추천.
+    *   **컴포넌트 구현 (`ComprehensiveCalculator.tsx`):** 재고, 시세, 추가 정보를 입력받고 분석 결과를 표시하는 UI 구현.
+    *   **앱 통합 (`App.tsx`):** '종합 분석 계산기' 탭 추가.
+
+---

@@ -1,0 +1,904 @@
+<template>
+  <div class="container">
+    <div class="wrap-cal">
+      <h1>아비도스 제작 교환 계산</h1>
+      <div class="tabs">
+        <label
+          v-for="material in materials"
+          :key="material.code"
+          class="tab"
+          :class="{ active: selectedMaterial === material.code }"
+        >
+          <input
+            type="radio"
+            :value="material.code"
+            v-model="selectedMaterial"
+            class="hidden-radio"
+          />
+          {{ material.name }}
+        </label>
+      </div>
+      <div class="input-group">
+        <label :for="'inputA'">
+          <span :class="'resource-label resource-A'">
+            <div class="resource-icon-wrap">
+              <img
+                :src="selectedResources.A.imgUrl"
+                alt="resource icon"
+                class="resource-icon"
+              />
+            </div>
+            {{ selectedResources.A.name }}
+          </span>
+        </label>
+        <input
+          type="number"
+          maxlength="6"
+          v-model.number="resources.A"
+          placeholder="Enter value"
+        />
+      </div>
+      <div class="input-group">
+        <label :for="'inputB'">
+          <span :class="'resource-label resource-B'">
+            <div class="resource-icon-wrap">
+              <img
+                :src="selectedResources.B.imgUrl"
+                alt="resource icon"
+                class="resource-icon"
+              />
+            </div>
+            {{ selectedResources.B.name }}
+          </span>
+        </label>
+        <input
+          type="number"
+          maxlength="6"
+          v-model.number="resources.B"
+          placeholder="Enter value"
+        />
+      </div>
+      <div v-if="selectedResources.S" class="input-group">
+        <label :for="'inputS'">
+          <span :class="'resource-label resource-S'">
+            <div class="resource-icon-wrap">
+              <img
+                :src="selectedResources.S.imgUrl"
+                alt="resource icon"
+                class="resource-icon"
+              />
+            </div>
+            {{ selectedResources.S.name }}
+          </span>
+          <span class="desc">- 3티어</span>
+        </label>
+        <input
+          type="number"
+          v-model.number="resources.S"
+          placeholder="Enter value"
+        />
+      </div>
+      <div class="input-group">
+        <label :for="'inputC'">
+          <span :class="'resource-label resource-C'">
+            <div class="resource-icon-wrap">
+              <img
+                :src="selectedResources.C.imgUrl"
+                alt="resource icon"
+                class="resource-icon"
+              />
+            </div>
+            {{ selectedResources.C.name }}
+          </span>
+          <span class="desc" v-if="selectedResources.S">- 4티어</span>
+        </label>
+        <input
+          type="number"
+          v-model.number="resources.C"
+          placeholder="Enter value"
+        />
+      </div>
+      <div class="input-group">
+        <label :for="'inputP'">
+          <span :class="'resource-label resource-P'">
+            <div class="resource-icon-wrap">
+              <img
+                :src="selectedResources.P.imgUrl"
+                alt="resource icon"
+                class="resource-icon"
+              />
+            </div>
+            {{ selectedResources.P.name }}
+          </span>
+        </label>
+        <input
+          type="number"
+          v-model.number="resources.P"
+          placeholder="Enter value"
+        />
+      </div>
+
+      <button :disabled="isDisabled || loading" @click="calculate">
+        {{ loading ? "계산중..." : "Calculate" }}
+      </button>
+
+      <div v-if="loading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <div v-if="result" class="result">
+        <template v-if="result.totalO === 0">
+          <div class="no-production">제작이 불가능합니다.</div>
+        </template>
+        <template v-else>
+          <div class="conversion-grid">
+            <template v-for="(count, key) in result.logs" :key="key">
+              <div v-if="count > 0" class="conversion-row">
+                <div class="label-wrap">
+                  <div
+                    :class="
+                      'resource-label ' + getClass(transformationMap[key].from)
+                    "
+                  >
+                    <div class="resource-icon-wrap">
+                      <img
+                        :src="
+                          selectedResources[transformationMap[key].from].imgUrl
+                        "
+                        alt="resource icon"
+                        class="resource-icon"
+                      />
+                    </div>
+                    {{ selectedResources[transformationMap[key].from].name }}
+                  </div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="label-wrap">
+                  <div
+                    :class="
+                      'resource-label ' + getClass(transformationMap[key].to)
+                    "
+                  >
+                    <div class="resource-icon-wrap">
+                      <img
+                        :src="
+                          selectedResources[transformationMap[key].to].imgUrl
+                        "
+                        alt="resource icon"
+                        class="resource-icon"
+                      />
+                    </div>
+                    {{ selectedResources[transformationMap[key].to].name }}
+                  </div>
+                </div>
+                <div class="count">
+                  <span class="num-point">{{ count }}</span
+                  >회 교환
+                </div>
+              </div>
+            </template>
+            <div class="conversion-row final-row">
+              <div class="final-product-label">
+                <span class="resource-label final-product">
+                  <div class="resource-icon-wrap">
+                    <img
+                      src="https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_12_86.png"
+                      alt="final product icon"
+                      class="resource-icon"
+                    />
+                  </div>
+                  아비도스 융화 재료
+                </span>
+              </div>
+              <div class="count">
+                <span class="num-point">{{ result.totalO }}</span
+                >회 제작
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+    <p class="update">update: 2025.06.27</p>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      loading: false,
+      resources: {
+        A: 0,
+        B: 0,
+        S: 0,
+        C: 0,
+        P: 0,
+      },
+      selectedMaterial: "WL", // 기본 선택값: 벌목
+      materials: [
+        {
+          code: "WL",
+          name: "벌목",
+          resources: {
+            A: {
+              name: "목재",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_3_252.png",
+            },
+            B: {
+              name: "부드러운 목재",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_3_253.png",
+            },
+            S: {
+              name: "튼튼한 목재",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_4_4.png",
+            },
+            C: {
+              name: "아비도스 목재",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/lifelevel/lifelevel_02_48.png",
+            },
+            P: {
+              name: "벌목의 가루",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_10_37.png",
+            },
+          },
+        },
+        {
+          code: "MN",
+          name: "채광",
+          resources: {
+            A: {
+              name: "철광석",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_3_243.png",
+            },
+            B: {
+              name: "묵직한 철광석",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_3_239.png",
+            },
+            S: {
+              name: "단단한 철광석",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_5_76.png",
+            },
+            C: {
+              name: "아비도스 철광석",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/lifelevel/lifelevel_02_49.png",
+            },
+            P: {
+              name: "채광의 가루",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_10_36.png",
+            },
+          },
+        },
+        {
+          code: "AR",
+          name: "고고학",
+          resources: {
+            A: {
+              name: "고대 유물",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_9_3.png",
+            },
+            B: {
+              name: "희귀한 유물",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_9_4.png",
+            },
+            S: null,
+            C: {
+              name: "아비도스 유물",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/lifelevel/lifelevel_02_55.png",
+            },
+            P: {
+              name: "고고학의 가루",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_10_40.png",
+            },
+          },
+        },
+        {
+          code: "FS",
+          name: "낚시",
+          resources: {
+            A: {
+              name: "생선",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_1_142.png",
+            },
+            B: {
+              name: "붉은 살 생선",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_4_49.png",
+            },
+            S: null,
+            C: {
+              name: "아비도스 태양 잉어",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/lifelevel/lifelevel_02_53.png",
+            },
+            P: {
+              name: "낚시의 가루",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_10_35.png",
+            },
+          },
+        },
+        {
+          code: "HR",
+          name: "수렵",
+          resources: {
+            A: {
+              name: "두툼한 생고기",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_2_192.png",
+            },
+            B: {
+              name: "다듬은 생고기",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_2_196.png",
+            },
+            S: null,
+            C: {
+              name: "아비도스 두툼한 생고기",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/lifelevel/lifelevel_02_51.png",
+            },
+            P: {
+              name: "수렵의 가루",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_10_39.png",
+            },
+          },
+        },
+        {
+          code: "CL",
+          name: "채집",
+          resources: {
+            A: {
+              name: "들꽃",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_8_46.png",
+            },
+            B: {
+              name: "수줍은 들꽃",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_4_14.png",
+            },
+            S: null,
+            C: {
+              name: "아비도스 들꽃",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/lifelevel/lifelevel_02_47.png",
+            },
+            P: {
+              name: "채집의 가루",
+              imgUrl:
+                "https://cdn-lostark.game.onstove.com/efui_iconatlas/use/use_10_38.png",
+            },
+          },
+        },
+      ],
+      result: null,
+      transformationMap: {
+        StoA: { from: "S", to: "A" },
+        BtoA: { from: "B", to: "A" },
+        AtoP: { from: "A", to: "P" },
+        BtoP: { from: "B", to: "P" },
+        PtoC: { from: "P", to: "C" },
+      },
+    };
+  },
+  computed: {
+    selectedResources() {
+      const selected = this.materials.find(
+        (material) => material.code === this.selectedMaterial
+      );
+      return selected ? selected.resources : {};
+    },
+    isDisabled() {
+      return !(
+        this.resources.A ||
+        this.resources.B ||
+        this.resources.C ||
+        this.resources.S ||
+        this.resources.P
+      );
+    },
+  },
+  watch: {
+    selectedMaterial() {
+      this.resources = {
+        A: 0,
+        B: 0,
+        S: 0,
+        C: 0,
+        P: 0,
+      };
+      this.result = null;
+    },
+    resources: {
+      handler(newResources) {
+        for (const key in newResources) {
+          if (
+            newResources[key] === "" ||
+            newResources[key] === null ||
+            newResources[key] === undefined
+          ) {
+            this.resources[key] = 0;
+          }
+        }
+        // this.debouncedCalculate();
+      },
+      deep: true,
+    },
+  },
+  methods: {
+    async calculate() {
+      this.loading = true;
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        const rates = {
+          StoA: { input: 5, output: 50 },
+          BtoA: { input: 25, output: 50 },
+          AtoP: { input: 100, output: 80 },
+          BtoP: { input: 50, output: 80 },
+          PtoC: { input: 100, output: 10 },
+        };
+
+        const oRecipe = { A: 86, B: 45, C: 33 };
+
+        let resources = { ...this.resources };
+        let bestResult = {
+          count: 0,
+          exchanges: {
+            StoA: 0,
+            BtoA: 0,
+            AtoP: 0,
+            BtoP: 0,
+            PtoC: 0,
+          },
+        };
+
+        if (
+          (this.selectedMaterial === "WL" || this.selectedMaterial === "MN") &&
+          resources.S > 0
+        ) {
+          bestResult.exchanges.StoA = Math.floor(
+            resources.S / rates.StoA.input
+          );
+          resources.A += bestResult.exchanges.StoA * rates.StoA.output;
+          resources.S -= bestResult.exchanges.StoA * rates.StoA.input;
+        }
+
+        let maxO = 0;
+        let bestExchanges = { ...bestResult.exchanges };
+
+        const canBtoA =
+          this.selectedMaterial === "WL" || this.selectedMaterial === "MN";
+        const maxBtoA = canBtoA
+          ? Math.floor(resources.B / rates.BtoA.input)
+          : 0;
+
+        for (let BtoA = 0; BtoA <= maxBtoA; BtoA++) {
+          let tempResources = { ...resources };
+
+          tempResources.B -= BtoA * rates.BtoA.input;
+          tempResources.A += BtoA * rates.BtoA.output;
+
+          let currentMax = Math.min(
+            Math.floor(tempResources.A / oRecipe.A),
+            Math.floor(tempResources.B / oRecipe.B),
+            Math.floor(tempResources.C / oRecipe.C)
+          );
+
+          let remaining = {
+            A: tempResources.A - currentMax * oRecipe.A,
+            B: tempResources.B - currentMax * oRecipe.B,
+            C: tempResources.C - currentMax * oRecipe.C,
+            P: tempResources.P,
+          };
+
+          const maxAtoP = Math.floor(remaining.A / rates.AtoP.input);
+          const maxBtoP = Math.floor(remaining.B / rates.BtoP.input);
+
+          for (let AtoP = 0; AtoP <= maxAtoP; AtoP++) {
+            let currentA = remaining.A - AtoP * rates.AtoP.input;
+            let totalP = remaining.P + AtoP * rates.AtoP.output;
+
+            for (let BtoP = 0; BtoP <= maxBtoP; BtoP++) {
+              let currentB = remaining.B - BtoP * rates.BtoP.input;
+              let currentP = totalP + BtoP * rates.BtoP.output;
+
+              let PtoC = Math.floor(currentP / rates.PtoC.input);
+              let currentC = remaining.C + PtoC * rates.PtoC.output;
+
+              let producedO =
+                currentMax +
+                Math.min(
+                  Math.floor(currentA / oRecipe.A),
+                  Math.floor(currentB / oRecipe.B),
+                  Math.floor(currentC / oRecipe.C)
+                );
+
+              if (producedO > maxO) {
+                maxO = producedO;
+                bestExchanges = {
+                  ...bestResult.exchanges,
+                  BtoA,
+                  AtoP,
+                  BtoP,
+                  PtoC,
+                };
+              }
+            }
+          }
+        }
+
+        this.result = {
+          totalO: maxO,
+          logs: Object.entries(bestExchanges)
+            .filter(([_, value]) => value > 0)
+            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {}),
+        };
+      } finally {
+        this.loading = false;
+      }
+    },
+    debouncedCalculate: window._.debounce(function () {
+      this.calculate();
+    }, 300),
+    getClass(resourceKey) {
+      const classMap = {
+        A: "resource-A",
+        B: "resource-B",
+        S: "resource-S",
+        C: "resource-C",
+        P: "resource-P",
+      };
+      return classMap[resourceKey] || "resource-default";
+    },
+  },
+};
+</script>
+
+<style>
+body {
+  font-family: "Noto Sans KR", sans-serif;
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+.container {
+  max-width: 550px;
+  width: 90%;
+  margin: 20px auto 50px;
+}
+
+.wrap-cal {
+  padding: 20px;
+  background-color: #2b2b2b;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.update {
+  margin-top: 10px;
+  text-align: right;
+}
+
+h1 {
+  font-size: 2em;
+  color: #ffffff;
+  border-bottom: 2px solid #3a3a3a;
+  padding-bottom: 10px;
+  margin: 20px 0;
+  text-align: center;
+  word-break: keep-all;
+}
+
+h2 {
+  font-size: 1.5em;
+  color: #ffffff;
+  margin-bottom: 15px;
+}
+
+.input-group {
+  margin-top: 15px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 1em;
+  margin-bottom: 5px;
+  color: #b0b0b0;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px;
+  font-size: 1em;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+}
+
+.input-group input:focus {
+  border-color: #5a5a5a;
+  outline: none;
+}
+
+button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 20px 10px;
+  font-size: 1em;
+  border: none;
+  border-radius: 4px;
+  background-color: #3a3a3a;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #5a5a5a;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button:disabled:hover {
+  background-color: #3a3a3a;
+}
+
+.tabs-title {
+  font-size: 1.2em;
+  color: #b0b0b0;
+  margin-bottom: 10px;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.tab {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  cursor: pointer;
+  background-color: #2b2b2b;
+  color: #b0b0b0;
+  border: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tab.active {
+  background-color: #3a3a3a;
+  color: #e0e0e0;
+}
+
+.tab:hover {
+  background-color: #4a4a4a;
+  color: #ffffff;
+}
+
+.hidden-radio {
+  display: none;
+}
+
+.result {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #2b2b2b;
+  border-radius: 4px;
+  border: 1px solid #3a3a3a;
+}
+
+.result p {
+  margin: 5px 0;
+  color: #d0d0d0;
+}
+
+.input-group label {
+  display: flex;
+  align-items: center;
+  font-size: 1em;
+  color: #b0b0b0;
+  font-weight: normal;
+}
+
+.resource-label {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  height: auto;
+  font-size: 0.85em;
+  text-align: center;
+  font-weight: bold;
+  white-space: nowrap;
+  gap: 5px;
+}
+
+.resource-A,
+.resource-P {
+  color: rgb(159, 159, 159);
+  border-color: rgb(159, 159, 159);
+}
+
+.resource-B {
+  color: rgb(120 187 39);
+  border-color: rgb(120 187 39);
+}
+
+.resource-S,
+.resource-C,
+.final-product {
+  color: rgb(25 124 197);
+  border-color: rgb(25 124 197);
+}
+
+.resource-A .resource-icon-wrap,
+.resource-P .resource-icon-wrap,
+.resource-default .resource-icon-wrap {
+  background: linear-gradient(135deg, rgb(49, 49, 49), rgb(88, 88, 88));
+}
+
+.resource-B .resource-icon-wrap {
+  background: linear-gradient(135deg, rgb(30, 45, 11), rgb(48, 73, 17));
+}
+
+.resource-S .resource-icon-wrap,
+.resource-C .resource-icon-wrap,
+.final-product .resource-icon-wrap {
+  background: linear-gradient(135deg, rgb(17, 39, 57), rgb(17, 61, 93));
+}
+
+.conversion-grid {
+  display: grid;
+  grid-template-columns: auto auto auto 120px;
+  align-items: center;
+  gap: 10px;
+}
+
+.conversion-row {
+  display: contents;
+}
+
+.label-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.arrow {
+  text-align: center;
+  color: #e0e0e0;
+  font-size: 1.2em;
+}
+
+.conversion-row + .conversion-row.final-row {
+  border-top: 1px solid #3a3a3a;
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.final-row {
+  grid-column: span 4;
+  display: grid;
+  grid-template-columns: auto 120px;
+  align-items: center;
+}
+
+.final-product-label {
+  flex: 1 1 auto;
+  font-weight: bold;
+  text-align: center;
+}
+
+.count {
+  text-align: center;
+  font-size: 1em;
+  color: #d0d0d0;
+}
+
+.final-row .count {
+  flex: 0 0 auto;
+}
+
+.no-production {
+  color: #ff6666;
+  text-align: center;
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 15px 0;
+}
+.desc {
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 11px;
+}
+
+.resource-icon-wrap {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+}
+
+.resource-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: cover;
+}
+.num-point {
+  color: #ffd700;
+  font-weight: bold;
+  display: inline-block;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.8);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #3a3a3a;
+  border-top: 5px solid #ffd700;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+</style>
