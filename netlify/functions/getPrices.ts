@@ -1,9 +1,8 @@
 import type { Handler } from "@netlify/functions";
-import { getStore } from "@netlify/blobs";
 
-export const handler: Handler = async () => {
+export const handler: Handler = async (event, context) => {
   try {
-    const store = getStore("prices");
+    const store = context.blobs.get("prices");
     const latestPrices = await store.get("latest", { type: "json" });
 
     if (!latestPrices) {

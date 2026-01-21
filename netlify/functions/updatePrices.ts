@@ -1,5 +1,4 @@
 import type { Handler } from "@netlify/functions";
-import { getStore } from "@netlify/blobs";
 
 // 조회할 아이템 목록과 속성을 체계적으로 관리
 const ITEMS_TO_FETCH = [
@@ -70,7 +69,7 @@ const fetchPriceFromLostArk = async (
   }
 };
 
-export const handler: Handler = async () => {
+export const handler: Handler = async (_event, context) => {
   const apiKey = process.env.LOSTARK_API_KEY;
 
   if (!apiKey) {
@@ -109,7 +108,7 @@ export const handler: Handler = async () => {
   };
 
   try {
-    const store = getStore("prices");
+    const store = context.blobs.get("prices");
     await store.setJSON("latest", responseData);
     console.log("Successfully updated prices to Netlify Blobs.", responseData);
   } catch (error) {
