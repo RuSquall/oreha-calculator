@@ -118,7 +118,7 @@ const Maximizer = () => {
                           </span>
                           <span style={{ marginLeft: '5px', color: fromGradeStyle.color }}>{step.fromMaterial} x{step.fromAmount}</span>
                           <span style={{ margin: '0 5px' }}> → </span>
-                          <span style={toGradePath}>
+                          <span style={toGradeStyle}>
                             <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '20px', height: '20px' }} />
                           </span>
                           <span style={{ marginLeft: '5px', color: toGradeStyle.color }}>{step.toMaterial} x{step.toAmount}</span>
