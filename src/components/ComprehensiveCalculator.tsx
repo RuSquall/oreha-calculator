@@ -258,7 +258,18 @@ const ComprehensiveCalculator = () => {
                       <h6 className="text-muted small">제작/판매 시 필요 교환:</h6>
                       <ul className="small text-muted">
                         {result.craftSellExchangeSteps.map((step, stepIndex) => (
-                          <li key={stepIndex}>{step}</li>
+                          <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                            <span style={getItemGradeStyle(step.fromMaterial, theme)}>
+                              <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '20px', height: '20px' }} />
+                            </span>
+                            <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.fromMaterial, theme).color }}>{step.fromMaterial} x{step.fromAmount}</span>
+                            <span style={{ margin: '0 5px' }}> → </span>
+                            <span style={getItemGradeStyle(step.toMaterial, theme)}>
+                              <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '20px', height: '20px' }} />
+                            </span>
+                            <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.toMaterial, theme).color }}>{step.toMaterial} x{step.toAmount}</span>
+                            <span style={{ marginLeft: '5px' }}> (x{step.count}회)</span>
+                          </li>
                         ))}
                       </ul>
                     </div>
