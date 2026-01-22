@@ -37,7 +37,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--bg-color);
+  background-color: var(--bg-color) !important; /* Force background color */
   color: var(--text-color);
   transition: background-color 0.2s ease, color 0.2s ease;
 }
@@ -80,6 +80,6 @@ code {
 
 /* Placeholder text color for better visibility in both themes */
 .form-control::placeholder {
-  color: #6c757d;
+  color: #adb5bd; /* Lighter gray */
   opacity: 1; /* Override Firefox's lower default opacity */
 }
