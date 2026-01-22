@@ -126,7 +126,10 @@ export const calculateMaxCrafts = (
       
       const neededB = stage2Crafts * oRecipe.B;
       const availableB_for_powder = res1['부드러운 목재'] - neededB;
-      const bToP_to_use = Math.ceil(Math.max(0, powderDeficit) / EX.FROM_SOFT_TO_POWDER.toAmount);
+      const maxPowderFromB = Math.floor(Math.max(0, availableB_for_powder) / EX.FROM_SOFT_TO_POWDER.fromAmount) * EX.FROM_SOFT_TO_POWDER.toAmount;
+      
+      const powderToGetFromB = Math.min(Math.max(0, powderDeficit), maxPowderFromB);
+      const bToP_to_use = Math.ceil(powderToGetFromB / EX.FROM_SOFT_TO_POWDER.toAmount);
       let bToP_count = bToP_to_use > 0 ? bToP_to_use : 0;
 
       bestExchanges = {
