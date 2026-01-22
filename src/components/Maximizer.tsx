@@ -13,10 +13,16 @@ const getImagePath = (itemName: string): string => {
 
 const Maximizer = () => {
   const { theme } = useTheme();
-  const [inventory, setInventory] = useState<Inventory>(
-    MATERIAL_NAMES.reduce((acc, name) => ({ ...acc, [name]: 0 }), {} as Inventory)
-  );
-  const [results, setResults] = useState<MaximizerResult[] | null>(null);
+  const defaultInventory: Inventory = MATERIAL_NAMES.reduce((acc, name) => ({ ...acc, [name]: 0 }), {} as Inventory);
+
+  const initialResults: MaximizerResult[] = RECIPES.map(recipe => ({
+    maxCrafts: 0,
+    exchangeSteps: [],
+    remainingInventory: defaultInventory,
+  }));
+
+  const [inventory, setInventory] = useState<Inventory>(defaultInventory);
+  const [results, setResults] = useState<MaximizerResult[]>(initialResults);
 
   const handleInventoryChange = (name: MaterialName, value: string) => {
     setInventory({
@@ -34,48 +40,54 @@ const Maximizer = () => {
   };
 
   return (
-    <Card>
-      <Card.Body>
-        <Form onSubmit={handleSubmit}>
-          <h5 className="card-title text-center mb-4">1. 보유 재료 입력</h5>
-          <Row>
-            {MATERIAL_NAMES.map((name) => {
-              const gradeStyle = getItemGradeStyle(name, theme);
-              return (
-                <Col md={6} key={name}>
-                  <Form.Group className="mb-3" controlId={`inventory-${name}`}>
-                    <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
-                      <span style={gradeStyle}>
-                        <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px' }} />
-                      </span>
-                      <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{name}</span>
-                    </Form.Label>
-                    <Form.Control
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={inventory[name] === 0 ? '' : inventory[name]}
-                      onChange={(e) => handleInventoryChange(name, e.target.value)}
-                      placeholder="보유 수량"
-                    />
-                  </Form.Group>
-                </Col>
-              );
-            })}
-          </Row>
-          
-          <div className="d-grid mt-4">
-            <Button variant="primary" size="lg" type="submit">
-              최대 생산량 계산
-            </Button>
-          </div>
-        </Form>
+    <Row> {/* Main Row for two-column layout */}
+      <Col md={5}> {/* Left column for input form */}
+        <Card>
+          <Card.Body>
+            <Form onSubmit={handleSubmit}>
+              <h5 className="card-title text-center mb-4">1. 보유 재료 입력</h5>
+              <Row>
+                {MATERIAL_NAMES.map((name) => {
+                  const gradeStyle = getItemGradeStyle(name, theme);
+                  return (
+                    <Col md={12} key={name}> {/* Changed to md={12} for single column */}
+                      <Form.Group className="mb-3" controlId={`inventory-${name}`}>
+                        <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
+                          <span style={gradeStyle}>
+                            <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px' }} />
+                          </span>
+                          <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{name}</span>
+                        </Form.Label>
+                        <Form.Control
+                          type="number"
+                          min="0"
+                          step="1"
+                          value={inventory[name] === 0 ? '' : inventory[name]}
+                          onChange={(e) => handleInventoryChange(name, e.target.value)}
+                          placeholder="보유 수량"
+                        />
+                      </Form.Group>
+                    </Col>
+                  );
+                })}
+              </Row>
+              
+              <div className="d-grid mt-4">
+                <Button variant="primary" size="lg" type="submit">
+                  최대 생산량 계산
+                </Button>
+              </div>
+            </Form>
+          </Card.Body>
+        </Card>
+      </Col>
 
-        {results && results.map((result, index) => {
+      <Col md={7}> {/* Right column for results */}
+        {results.map((result, index) => { // results is now always an array
           const recipeName = RECIPES[index].name;
           const titleGradeStyle = getItemGradeStyle(recipeName, theme);
           return (
-            <Alert key={index} variant="info" className="mt-4">
+            <Alert key={index} variant="info" className="mb-3"> {/* Added mb-3 for spacing between alerts */}
               <Alert.Heading style={{ color: titleGradeStyle.color }}>{recipeName} 최대 생산량 계산 결과</Alert.Heading>
               <hr />
               <p className="mb-3 h4">
@@ -91,27 +103,12 @@ const Maximizer = () => {
                   </ul>
                 </>
               )}
-              <h6>남는 재료:</h6>
-              <ul>
-                {MATERIAL_NAMES.map(name => {
-                  const gradeStyle = getItemGradeStyle(name, theme);
-                  return (
-                    <li key={`remaining-${name}`} style={{ display: 'flex', alignItems: 'center', color: gradeStyle.color }}>
-                      <span style={gradeStyle}>
-                        <img src={getImagePath(name)} alt={name} style={{ width: '20px', height: '20px' }} />
-                      </span>
-                      <span style={{ marginLeft: '5px' }}>
-                        {name}: {Math.floor(result.remainingInventory[name]).toLocaleString()}개
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
+              {/* Removed "남는 재료" section */}
             </Alert>
           );
         })}
-      </Card.Body>
-    </Card>
+      </Col>
+    </Row>
   );
 };
 
