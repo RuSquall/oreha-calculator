@@ -65,8 +65,8 @@ export interface ComprehensiveAnalysisResult {
   totalValueCraftSell: number;
   totalValueCraftUse: number;
   maxCraftsPossible: number;
-  craftSellExchangeSteps: string[];
-  craftUseExchangeSteps: string[];
+  craftSellExchangeSteps: ExchangeStepDetail[];
+  craftUseExchangeSteps: ExchangeStepDetail[];
   message?: string;
 }
 
