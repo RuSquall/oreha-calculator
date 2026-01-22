@@ -3,13 +3,8 @@ import { Form, Button, Card, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { MaterialName, CraftableItem, Inventory, ComprehensiveAnalysisResult } from '../types/data';
 import { MATERIAL_NAMES, PURCHASABLE_MATERIALS, RECIPES } from '../logic/constants';
 import { analyzeComprehensiveProfit } from '../logic/comprehensiveCalculator';
-import { getItemGradeStyle } from '../logic/grades';
+import { getItemGradeStyle, getImagePath, getImageBackgroundStyle } from '../logic/grades'; // Updated import
 import { useTheme } from '../context/ThemeContext';
-
-const getImagePath = (itemName: string): string => {
-  const fileName = itemName.replace(/ /g, '_');
-  return `/${fileName}.png`;
-};
 
 type Prices = Partial<Record<MaterialName, number>>;
 
@@ -114,9 +109,7 @@ const ComprehensiveCalculator = () => {
                 <Col md={6} key={`inv-${name}`}>
                     <Form.Group className="mb-3" controlId={`inventory-${name}`}>
                       <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
-                        <span style={gradeStyle}>
-                          <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px' }} />
-                        </span>
+                        <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(name, theme) }} />
                         <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{name}</span>
                       </Form.Label>
                       <Form.Control
@@ -155,9 +148,7 @@ const ComprehensiveCalculator = () => {
                   <Col md={6} key={`price-${name}`}>
                     <Form.Group className="mb-3" controlId={`price-${name}`}>
                       <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
-                        <span style={gradeStyle}>
-                          <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px' }} />
-                        </span>
+                        <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(name, theme) }} />
                         <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{name}</span>
                       </Form.Label>
                       <Form.Control
@@ -199,9 +190,7 @@ const ComprehensiveCalculator = () => {
                 <Col md={6} key={`fusionPrice-${recipe.name}`}>
                   <Form.Group className="mb-3" controlId={`fusionPrice-${recipe.name}`}>
                     <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
-                      <span style={gradeStyle}>
-                        <img src={getImagePath(recipe.name)} alt={recipe.name} style={{ width: '24px', height: '24px' }} />
-                      </span>
+                        <img src={getImagePath(recipe.name)} alt={recipe.name} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(recipe.name, theme) }} />
                       <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{recipe.name} 시장 가격 (1개당)</span>
                     </Form.Label>
                     <Form.Control
@@ -259,14 +248,10 @@ const ComprehensiveCalculator = () => {
                       <ul className="small text-muted">
                         {result.craftSellExchangeSteps.map((step, stepIndex) => (
                           <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                            <span style={getItemGradeStyle(step.fromMaterial, theme)}>
-                              <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '20px', height: '20px' }} />
-                            </span>
+                            <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.fromMaterial, theme) }} />
                             <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.fromMaterial, theme).color }}>{step.fromMaterial} x{step.fromAmount}</span>
                             <span style={{ margin: '0 5px' }}> → </span>
-                            <span style={getItemGradeStyle(step.toMaterial, theme)}>
-                              <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '20px', height: '20px' }} />
-                            </span>
+                            <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.toMaterial, theme) }} />
                             <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.toMaterial, theme).color }}>{step.toMaterial} x{step.toAmount}</span>
                             <span style={{ marginLeft: '5px' }}> (x{step.count}회)</span>
                           </li>

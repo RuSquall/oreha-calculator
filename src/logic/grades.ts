@@ -66,21 +66,36 @@ export const getItemGradeStyle = (
   theme: 'light' | 'dark'
 ): React.CSSProperties => {
   const grade = MATERIAL_GRADES[itemName] || '일반';
-  
-  // Style for the current theme (mainly for text color)
   const themeStyle = GRADE_STYLES[grade]?.[theme] || GRADE_STYLES[grade]?.light;
   
-  // Style for the dark theme (for the static background)
-  const darkStyle = GRADE_STYLES[grade]?.dark;
-
-  // Combine styles: static background, dynamic color, and layout styles
   return {
-    background: darkStyle.background, // Always use the dark theme background
     color: themeStyle.color, // Use the color appropriate for the current theme
+    // Remove background property from here
     padding: '2px',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     boxSizing: 'border-box',
   };
+};
+
+export const getImageBackgroundStyle = (
+  itemName: MaterialName | CraftableItem,
+  theme: 'light' | 'dark'
+): React.CSSProperties => {
+  const grade = MATERIAL_GRADES[itemName] || '일반';
+  const darkStyle = GRADE_STYLES[grade]?.dark; // Always use the dark theme background for consistency
+
+  return {
+    background: darkStyle.background,
+    borderRadius: '4px', // Optional: add some border-radius for aesthetics
+    padding: '2px', // Optional: add some padding around the image
+  };
+};
+
+export const getImagePath = (itemName: MaterialName | CraftableItem): string => {
+  // Assuming images are in the public folder and named after the item
+  // Replace spaces with underscores for file names
+  const fileName = itemName.replace(/ /g, '_');
+  return `/${fileName}.png`;
 };

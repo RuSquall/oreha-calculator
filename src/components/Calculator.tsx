@@ -1,244 +1,158 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Button, Card, Row, Col, Alert, Spinner } from 'react-bootstrap';
-import { MaterialName, CraftableItem, ProfitAnalysisResult } from '../types/data';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Container, Row, Col, Form, Card, Spinner, Alert } from 'react-bootstrap';
 import { PURCHASABLE_MATERIALS, RECIPES } from '../logic/constants';
+import { MaterialName, ProfitAnalysisResult, CraftableItem } from '../types/data';
 import { analyzeCraftingProfit } from '../logic/calculator';
-import { getItemGradeStyle } from '../logic/grades';
+import { getImagePath, getItemGradeStyle, getImageBackgroundStyle } from '../logic/grades';
 import { useTheme } from '../context/ThemeContext';
 
-const getImagePath = (itemName: string): string => {
-  const fileName = itemName.replace(/ /g, '_');
-  return `/${fileName}.png`;
-};
-
-type Prices = Partial<Record<MaterialName, number>>;
-
-const Calculator = () => {
+const Calculator: React.FC = () => {
   const { theme } = useTheme();
-  const [prices, setPrices] = useState<Prices>({});
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [materialPrices, setMaterialPrices] = useState<Record<MaterialName, number>>({} as Record<MaterialName, number>);
+  const [craftFeeDiscount, setCraftFeeDiscount] = useState<number>(0);
+  const [itemPrices, setItemPrices] = useState<Record<CraftableItem, number>>({
+    '상급 아비도스 융화 재료': 0,
+    '아비도스 융화 재료': 0,
+  });
+  const [results, setResults] = useState<Record<CraftableItem, ProfitAnalysisResult> | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
-
-  const [craftFeeReduction, setCraftFeeReduction] = useState<number>(0);
-  const [fusionMaterialPrices, setFusionMaterialPrices] = useState<Partial<Record<CraftableItem, number>>>(
-    RECIPES.reduce((acc, recipe) => ({ ...acc, [recipe.name]: 0 }), {} as Partial<Record<CraftableItem, number>>)
-  );
-  const [results, setResults] = useState<ProfitAnalysisResult[] | null>(null);
-
-  useEffect(() => {
-    const fetchPrices = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('/.netlify/functions/getPrices');
-        if (!response.ok) {
-          throw new Error('서버에서 가격 정보를 가져오는 데 실패했습니다.');
-        }
-        const data = await response.json();
-        setPrices(data.prices || {});
-        setLastUpdated(data.lastUpdated);
-        const initialFusionPrices: Partial<Record<CraftableItem, number>> = {};
-        RECIPES.forEach(recipe => {
-          if (data.prices[recipe.name]) {
-            initialFusionPrices[recipe.name] = data.prices[recipe.name];
-          } else {
-            initialFusionPrices[recipe.name] = 0;
-          }
-        });
-        setFusionMaterialPrices(initialFusionPrices);
-
-      } catch (err: any) {
-        setError(err.message);
-        setPrices({});
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchPrices();
-  }, []);
 
   const handlePriceChange = (name: MaterialName, value: string) => {
-    setPrices({
-      ...prices,
-      [name]: parseFloat(value) || 0,
-    });
+    setMaterialPrices(prev => ({ ...prev, [name]: Number(value) }));
   };
 
-  const handleFusionPriceChange = (name: CraftableItem, value: string) => {
-    setFusionMaterialPrices({
-      ...fusionMaterialPrices,
-      [name]: parseFloat(value) || 0,
-    });
+  const handleItemPriceChange = (name: CraftableItem, value: string) => {
+    setItemPrices(prev => ({ ...prev, [name]: Number(value) }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const fullPrices = PURCHASABLE_MATERIALS.reduce((acc, name) => {
-        acc[name] = prices[name] || 0;
-        return acc;
-    }, {} as Record<MaterialName, number>);
+  const handleDiscountChange = (value: string) => {
+    setCraftFeeDiscount(Number(value));
+  };
 
-    const allResults: ProfitAnalysisResult[] = RECIPES.map(recipe => {
-      return analyzeCraftingProfit(
-        fullPrices,
-        craftFeeReduction,
-        fusionMaterialPrices[recipe.name] || 0,
-        recipe.name
-      );
-    });
-    setResults(allResults);
+  const runAnalysis = useCallback(() => {
+    try {
+      const superiorResult = analyzeCraftingProfit(materialPrices, craftFeeDiscount, itemPrices['상급 아비도스 융화 재료'], '상급 아비도스 융화 재료');
+      const normalResult = analyzeCraftingProfit(materialPrices, craftFeeDiscount, itemPrices['아비도스 융화 재료'], '아비도스 융화 재료');
+      
+      setResults({
+        '상급 아비도스 융화 재료': superiorResult,
+        '아비도스 융화 재료': normalResult,
+      });
+      setError(null);
+    } catch (e: any) {
+      setError(e.message || '분석 중 오류가 발생했습니다.');
+      setResults(null);
+    }
+  }, [materialPrices, craftFeeDiscount, itemPrices]);
+
+  useEffect(() => {
+    runAnalysis();
+  }, [runAnalysis]);
+
+  const renderResultCard = (itemName: CraftableItem) => {
+    const result = results?.[itemName];
+    if (!result) return null;
+
+    const isNotRecommended = result.recommendation === '제작 비추천';
+    const isError = result.recommendation === '오류';
+
+    return (
+      <Col md={6} className="mb-3">
+        <Card bg={theme} text={theme === 'dark' ? 'light' : 'dark'} className="h-100">
+          <Card.Header as="h5" style={getItemGradeStyle(itemName, theme)} className="d-flex align-items-center">
+            <img src={getImagePath(itemName)} alt={itemName} width="30" height="30" className="me-2" style={getImageBackgroundStyle(itemName, theme)} />
+            {itemName}
+          </Card.Header>
+          <Card.Body>
+            {isError ? (
+              <Alert variant="danger">{result.message}</Alert>
+            ) : (
+              <>
+                <Alert variant={isNotRecommended ? 'danger' : 'success'}>
+                  <strong>최적 추천: {result.recommendation}</strong>
+                </Alert>
+                <p>
+                  제작 후 판매 이득: <span className={result.profitFromCraftAndSell >= 0 ? 'text-success' : 'text-danger'}>{result.profitFromCraftAndSell.toLocaleString()}</span> 골드
+                </p>
+                <p>
+                  제작 후 사용 이득: <span className={result.profitFromCraftAndUse >= 0 ? 'text-success' : 'text-danger'}>{result.profitFromCraftAndUse.toLocaleString()}</span> 골드
+                </p>
+                <hr />
+                <small className="text-muted">
+                  - 총 제작비: {result.totalCraftingCost.toLocaleString()} 골드<br />
+                  - 재료 판매 가치: {result.valueFromSellingMaterials.toLocaleString()} 골드
+                </small>
+              </>
+            )}
+          </Card.Body>
+        </Card>
+      </Col>
+    );
   };
 
   return (
-    <>
-      <Card>
-        <Card.Body>
-          <div className="text-center mb-4">
-            <Card.Title as="h3" className="d-inline-block me-2 mb-0">1. 재료 시세 입력 (100개당)</Card.Title>
-            {isLoading && <Spinner animation="border" size="sm" />}
-          </div>
-
-          {error && <Alert variant="danger">오류: {error}</Alert>}
-          
-          {lastUpdated && !isLoading && !error && (
-            <Alert variant="info" className="text-center py-2">
-              마지막 업데이트: {new Date(lastUpdated).toLocaleString()}
-            </Alert>
-          )}
-
-          <Form onSubmit={handleSubmit}>
-            <Row>
-              {PURCHASABLE_MATERIALS.map((name) => {
-                const gradeStyle = getItemGradeStyle(name, theme);
-                return (
-                  <Col md={6} key={name}>
-                    <Form.Group className="mb-3" controlId={`price-${name}`}>
-                      <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
-                        <span style={gradeStyle}>
-                          <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px' }} />
-                        </span>
-                        <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{name}</span>
-                      </Form.Label>
-                      <Form.Control
-                        type="number"
-                        min="0"
-                        step="any"
-                        value={prices[name] || ''}
-                        onChange={(e) => handlePriceChange(name, e.target.value)}
-                        placeholder={isLoading ? "불러오는 중..." : "골드"}
-                        disabled={isLoading}
-                      />
-                    </Form.Group>
-                  </Col>
-                );
-              })}
-            </Row>
-
-            <hr className="my-4" />
-
-            <Card.Title as="h3" className="text-center mb-4">2. 추가 정보 입력</Card.Title>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3" controlId="craftFeeReduction">
+    <Container fluid>
+      <Row>
+        {/* Inputs Column */}
+        <Col md={4}>
+          <h5>입력</h5>
+          <Card bg={theme} text={theme === 'dark' ? 'light' : 'dark'}>
+            <Card.Body>
+              <Form>
+                <Form.Group className="mb-3">
                   <Form.Label>제작 수수료 감소율 (%)</Form.Label>
-                  <Form.Control
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="any"
-                    value={craftFeeReduction === 0 ? '' : craftFeeReduction}
-                    onChange={(e) => setCraftFeeReduction(parseFloat(e.target.value) || 0)}
-                    placeholder="예: 15"
-                  />
+                  <Form.Control type="number" value={craftFeeDiscount} onChange={e => handleDiscountChange(e.target.value)} />
                 </Form.Group>
-              </Col>
-              {RECIPES.map(recipe => {
-                const gradeStyle = getItemGradeStyle(recipe.name, theme);
-                return (
-                  <Col md={6} key={`fusionPrice-${recipe.name}`}>
-                    <Form.Group className="mb-3" controlId={`fusionPrice-${recipe.name}`}>
-                      <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
-                        <span style={gradeStyle}>
-                          <img src={getImagePath(recipe.name)} alt={recipe.name} style={{ width: '24px', height: '24px' }} />
-                        </span>
-                        <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{recipe.name} 시장 가격 (1개당)</span>
-                      </Form.Label>
-                      <Form.Control
-                        type="number"
-                        min="0"
-                        step="any"
-                        value={fusionMaterialPrices[recipe.name] || ''}
-                        onChange={(e) => handleFusionPriceChange(recipe.name, e.target.value)}
-                        placeholder="골드"
-                      />
-                    </Form.Group>
-                  </Col>
-                );
-              })}
-            </Row>
-
-            <div className="d-grid mt-4">
-              <Button variant="primary" size="lg" type="submit">
-                수익성 분석
-              </Button>
-            </div>
-          </Form>
-        </Card.Body>
-      </Card>
-
-      {results && results.map((result, index) => {
-        const recipeName = RECIPES[index].name;
-        const titleGradeStyle = getItemGradeStyle(recipeName, theme);
-        return (
-          <Alert key={index} variant={result.recommendation === '오류' ? 'danger' : 'success'} className="mt-4">
-            <Alert.Heading>{result.message === '선택된 제작 아이템을 찾을 수 없습니다.' ? '분석 결과' : `${result.message || result.recommendation} 분석 결과`}</Alert.Heading>
-            <hr />
-            {result.recommendation === '오류' ? (
-              <p>{result.message}</p>
-            ) : (
-              <>
-                <h5 className="mb-3" style={{ color: titleGradeStyle.color }}>**{recipeName}**</h5>
-                <p className="mb-2">
-                  **추천:** <strong className="text-primary">{result.recommendation}</strong>
-                </p>
-                <p className="mb-2">
-                  제작 후 판매 시 예상 수익: <strong className="text-success">{result.profitFromCraftAndSell.toLocaleString()} 골드</strong> (10개 제작 기준)
-                </p>
-                <p className="mb-2">
-                  직접 사용 시 절약 비용: <strong className="text-info">{result.savingsFromCraftAndUse.toLocaleString()} 골드</strong> (10개 제작 기준)
-                </p>
-                <p className="mb-2">
-                  재료 직접 판매 시 가치: <strong className="text-warning">{result.valueFromSellingMaterials.toLocaleString()} 골드</strong> (10개 제작에 필요한 재료 기준)
-                </p>
                 <hr />
-                <p className="mb-0 text-muted small">
-                  * 제작 비용: {result.totalCraftingCost.toLocaleString()} 골드 (재료비 + 수수료)
-                </p>
-                <h6 className="mt-3">재료별 최적 수급 방법 (10개 제작 기준):</h6>
-                <ul>
-                  {result.materialCostBreakdown?.map((item, matIndex) => {
-                    const gradeStyle = getItemGradeStyle(item.name, theme);
-                    return (
-                      <li key={matIndex} className="small" style={{ display: 'flex', alignItems: 'center', color: gradeStyle.color }}>
-                        <span style={gradeStyle}>
-                          <img src={getImagePath(item.name)} alt={item.name} style={{ width: '20px', height: '20px' }} />
-                        </span>
-                        <span style={{ marginLeft: '5px' }}>
-                          {item.name}: {item.requiredAmount}개 (단가: {item.unitCost.toLocaleString()} 골드, 총: {item.totalCost.toLocaleString()} 골드) - {item.source}
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
+                {RECIPES.map(recipe => (
+                  <Form.Group className="mb-3" key={recipe.name}>
+                    <Form.Label style={getItemGradeStyle(recipe.name, theme)}>
+                      <img src={getImagePath(recipe.name)} alt={recipe.name} width="24" height="24" className="me-2" style={getImageBackgroundStyle(recipe.name, theme)} />
+                      {recipe.name} 시장 가격 (1개당)
+                    </Form.Label>
+                    <Form.Control type="number" value={itemPrices[recipe.name]} onChange={e => handleItemPriceChange(recipe.name, e.target.value)} />
+                  </Form.Group>
+                ))}
+                <hr />
+                {PURCHASABLE_MATERIALS.map(name => (
+                  <Form.Group className="mb-2" key={name}>
+                    <Form.Label style={getItemGradeStyle(name, theme)}>
+                      <img src={getImagePath(name)} alt={name} width="24" height="24" className="me-2" style={getImageBackgroundStyle(name, theme)} />
+                      {name} (100개당)
+                    </Form.Label>
+                    <Form.Control type="number" value={materialPrices[name] || ''} onChange={e => handlePriceChange(name, e.target.value)} />
+                  </Form.Group>
+                ))}
+              </Form>
+            </Card.Body>
+          </Card>
+        </Col>
+
+        {/* Results Column */}
+        <Col md={8}>
+          <h5>분석 결과</h5>
+          {error && <Alert variant="danger">{error}</Alert>}
+          <Row>
+            {results ? (
+              <>
+                {renderResultCard('상급 아비도스 융화 재료')}
+                {renderResultCard('아비도스 융화 재료')}
               </>
+            ) : (
+              <Col>
+                <Spinner animation="border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </Spinner>
+              </Col>
             )}
-          </Alert>
-        );
-      })}
-    </>
+          </Row>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 
 export default Calculator;
+
+
+// export default Calculator;

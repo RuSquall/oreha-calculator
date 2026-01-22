@@ -52,7 +52,7 @@ export interface MaterialCostDetail {
 export interface ProfitAnalysisResult {
   recommendation: string;
   profitFromCraftAndSell: number;
-  savingsFromCraftAndUse: number;
+  profitFromCraftAndUse: number;
   valueFromSellingMaterials: number;
   totalCraftingCost: number;
   message?: string;

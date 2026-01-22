@@ -10,6 +10,7 @@
   --btn-bg: #f8f9fa;
   --btn-text: #212529;
   --btn-hover-bg: #e2e6ea;
+  --placeholder-color: #adb5bd; /* Added */
 }
 
 .dark-mode {
@@ -24,6 +25,7 @@
   --btn-bg: #343a40;
   --btn-text: #e0e0e0;
   --btn-hover-bg: #495057;
+  --placeholder-color: #999; /* Changed to #999 */
 }
 
 html, body, #root {
@@ -80,6 +82,6 @@ code {
 
 /* Placeholder text color for better visibility in both themes */
 .form-control::placeholder {
-  color: #adb5bd; /* Lighter gray */
+  color: var(--placeholder-color) !important; /* Added !important */
   opacity: 1; /* Override Firefox's lower default opacity */
 }

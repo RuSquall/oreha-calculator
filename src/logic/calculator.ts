@@ -13,7 +13,7 @@ const calculateUnitSalesFee = (unitPrice: number): number => {
 export const analyzeCraftingProfit = (
   pricesPer100: Prices,
   craftFeeReduction: number,
-  fusionMaterialMarketPricePer1: number, // Renamed parameter
+  fusionMaterialMarketPricePer1: number,
   targetItemName: CraftableItem
 ): ProfitAnalysisResult => {
   
@@ -24,7 +24,7 @@ export const analyzeCraftingProfit = (
     return {
       recommendation: '오류',
       profitFromCraftAndSell: 0,
-      savingsFromCraftAndUse: 0,
+      profitFromCraftAndUse: 0,
       valueFromSellingMaterials: 0,
       totalCraftingCost: 0,
       materialCostBreakdown: [],
@@ -32,7 +32,6 @@ export const analyzeCraftingProfit = (
     };
   }
 
-  // Calculate material cost for 10 crafts and populate breakdown
   let materialCostFor10Crafts = 0;
   let allMaterialPricesKnown = true;
   const materialBreakdown: MaterialCostDetail[] = [];
@@ -57,11 +56,11 @@ export const analyzeCraftingProfit = (
     });
   }
 
-  if (!allMaterialPricesKnown || fusionMaterialMarketPricePer1 <= 0) { // Check per1 price
+  if (!allMaterialPricesKnown || fusionMaterialMarketPricePer1 <= 0) {
     return {
       recommendation: '오류',
       profitFromCraftAndSell: 0,
-      savingsFromCraftAndUse: 0,
+      profitFromCraftAndUse: 0,
       valueFromSellingMaterials: 0,
       totalCraftingCost: 0,
       materialCostBreakdown: [],
@@ -69,56 +68,49 @@ export const analyzeCraftingProfit = (
     };
   }
 
-  // Calculate actual crafting fee
   const baseGoldFee = recipe.gold;
   const actualCraftingFee = baseGoldFee * (1 - (craftFeeReduction / 100));
-
-  // Total cost to craft 10 items
   const totalCraftingCost = materialCostFor10Crafts + actualCraftingFee;
-
-  // Price of 10 fusion materials
   const fusionMaterialPriceFor10 = fusionMaterialMarketPricePer1 * 10;
 
-  // Choice A: Value from selling materials directly (opportunity cost)
+  // Value from selling materials (for reference)
   let totalSalesFeeForMaterials = 0;
   for (const material in recipe.materials) {
     const requiredMaterialName = material as MaterialName;
     const requiredAmount = recipe.materials[requiredMaterialName]!;
-    const marketValuePerUnit = effectiveCosts[requiredMaterialName].price; // This is the market value of the material
+    const marketValuePerUnit = effectiveCosts[requiredMaterialName].price;
     totalSalesFeeForMaterials += calculateUnitSalesFee(marketValuePerUnit) * requiredAmount;
   }
   const valueFromSellingMaterials = materialCostFor10Crafts - totalSalesFeeForMaterials;
 
-  // Choice B: Profit from crafting and selling
+  // Profit from crafting and selling
   const unitSalesFeeForCrafted = calculateUnitSalesFee(fusionMaterialMarketPricePer1);
   const totalSalesFeeForCrafted = unitSalesFeeForCrafted * 10;
   const revenueFromSellingCrafted = fusionMaterialPriceFor10 - totalSalesFeeForCrafted;
   const profitFromCraftAndSell = revenueFromSellingCrafted - totalCraftingCost;
 
-  // Choice C: Savings from crafting and using
-  const savingsFromCraftAndUse = fusionMaterialPriceFor10 - totalCraftingCost;
+  // Savings from crafting and using
+  const profitFromCraftAndUse = fusionMaterialPriceFor10 - totalCraftingCost;
 
-  // Determine recommendation
+  // NEW RECOMMENDATION LOGIC
   let recommendation = '';
-  if (profitFromCraftAndSell > valueFromSellingMaterials && profitFromCraftAndSell > 0) {
+  if (profitFromCraftAndSell < 0 && profitFromCraftAndUse < 0) {
+    recommendation = '제작 비추천';
+  } else if (profitFromCraftAndSell > profitFromCraftAndUse) {
     recommendation = '제작 후 판매';
-  } else if (savingsFromCraftAndUse > valueFromSellingMaterials && savingsFromCraftAndUse > 0) {
-    recommendation = '직접 사용 (제작)';
-  } else if (valueFromSellingMaterials > 0) {
-    recommendation = '재료 직접 판매';
   } else {
-    recommendation = '현재는 수익성이 없습니다.';
+    recommendation = '제작 후 사용';
   }
 
   return {
     recommendation: recommendation,
     profitFromCraftAndSell: Math.round(profitFromCraftAndSell),
-    savingsFromCraftAndUse: Math.round(savingsFromCraftAndUse),
+    profitFromCraftAndUse: Math.round(profitFromCraftAndUse),
     valueFromSellingMaterials: Math.round(valueFromSellingMaterials),
     totalCraftingCost: Math.round(totalCraftingCost),
     materialCostBreakdown: materialBreakdown.map(item => ({
       ...item,
-      unitCost: Math.round(item.unitCost * 100) / 100, // Round to 2 decimal places
+      unitCost: Math.round(item.unitCost * 100) / 100,
       totalCost: Math.round(item.totalCost),
     })),
   };

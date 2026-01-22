@@ -3,13 +3,8 @@ import { Form, Button, Card, Row, Col, Alert } from 'react-bootstrap';
 import { MaterialName, MaximizerResult, Inventory } from '../types/data';
 import { MATERIAL_NAMES, RECIPES } from '../logic/constants';
 import { calculateMaxCrafts } from '../logic/maximizer';
-import { getItemGradeStyle } from '../logic/grades';
+import { getItemGradeStyle, getImagePath, getImageBackgroundStyle } from '../logic/grades'; // Updated import
 import { useTheme } from '../context/ThemeContext';
-
-const getImagePath = (itemName: string): string => {
-  const fileName = itemName.replace(/ /g, '_');
-  return `/${fileName}.png`;
-};
 
 const Maximizer = () => {
   const { theme } = useTheme();
@@ -53,9 +48,7 @@ const Maximizer = () => {
                     <Col md={12} key={name}> {/* Changed to md={12} for single column */}
                       <Form.Group className="mb-3" controlId={`inventory-${name}`}>
                         <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
-                          <span style={gradeStyle}>
-                            <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px' }} />
-                          </span>
+                          <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(name, theme) }} />
                           <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{name}</span>
                         </Form.Label>
                         <Form.Control
@@ -94,9 +87,7 @@ const Maximizer = () => {
             >
               <Alert.Heading>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <span style={titleGradeStyle}>
-                    <img src={getImagePath(recipeName)} alt={recipeName} style={{ width: '24px', height: '24px' }} />
-                  </span>
+                  <img src={getImagePath(recipeName)} alt={recipeName} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(recipeName, theme) }} />
                   <span style={{ marginLeft: '8px', color: titleGradeStyle.color }}>{recipeName} 최대 생산량 계산 결과</span>
                 </div>
               </Alert.Heading>
@@ -113,14 +104,10 @@ const Maximizer = () => {
                       const toGradeStyle = getItemGradeStyle(step.toMaterial, theme);
                       return (
                         <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                          <span style={fromGradeStyle}>
-                            <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '20px', height: '20px' }} />
-                          </span>
+                          <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.fromMaterial, theme) }} />
                           <span style={{ marginLeft: '5px', color: fromGradeStyle.color }}>{step.fromMaterial} x{step.fromAmount}</span>
                           <span style={{ margin: '0 5px' }}> → </span>
-                          <span style={toGradeStyle}>
-                            <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '20px', height: '20px' }} />
-                          </span>
+                          <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.toMaterial, theme) }} />
                           <span style={{ marginLeft: '5px', color: toGradeStyle.color }}>{step.toMaterial} x{step.toAmount}</span>
                           <span style={{ marginLeft: '5px' }}> (x{step.count}회)</span>
                         </li>
