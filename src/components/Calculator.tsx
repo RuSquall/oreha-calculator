@@ -114,11 +114,11 @@ const Calculator = () => {
               {PURCHASABLE_MATERIALS.map((name) => (
                 <Col md={6} key={name}>
                   <Form.Group className="mb-3" controlId={`price-${name}`}>
-                    <Form.Label>
+                    <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
                       <span style={getItemGradeStyle(name)}>
-                        <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
-                        {name}
+                        <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px' }} />
                       </span>
+                      <span style={{ marginLeft: '8px' }}>{name}</span>
                     </Form.Label>
                     <Form.Control
                       type="number"
@@ -155,11 +155,11 @@ const Calculator = () => {
               {RECIPES.map(recipe => (
                 <Col md={6} key={`fusionPrice-${recipe.name}`}>
                   <Form.Group className="mb-3" controlId={`fusionPrice-${recipe.name}`}>
-                    <Form.Label>
+                    <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
                       <span style={getItemGradeStyle(recipe.name)}>
-                        <img src={getImagePath(recipe.name)} alt={recipe.name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
-                        {recipe.name} 시장 가격 (1개당)
+                        <img src={getImagePath(recipe.name)} alt={recipe.name} style={{ width: '24px', height: '24px' }} />
                       </span>
+                      <span style={{ marginLeft: '8px' }}>{recipe.name} 시장 가격 (1개당)</span>
                     </Form.Label>
                     <Form.Control
                       type="number"
@@ -211,11 +211,13 @@ const Calculator = () => {
               <h6 className="mt-3">재료별 최적 수급 방법 (10개 제작 기준):</h6>
               <ul>
                 {result.materialCostBreakdown?.map((item, matIndex) => (
-                  <li key={matIndex} className="small text-muted">
+                  <li key={matIndex} className="small text-muted" style={{ display: 'flex', alignItems: 'center' }}>
                     <span style={getItemGradeStyle(item.name)}>
-                      <img src={getImagePath(item.name)} alt={item.name} style={{ width: '20px', height: '20px', marginRight: '5px' }} />
-                      {item.name}
-                    </span>: {item.requiredAmount}개 (단가: {item.unitCost.toLocaleString()} 골드, 총: {item.totalCost.toLocaleString()} 골드) - {item.source}
+                      <img src={getImagePath(item.name)} alt={item.name} style={{ width: '20px', height: '20px' }} />
+                    </span>
+                    <span style={{ marginLeft: '5px' }}>
+                      {item.name}: {item.requiredAmount}개 (단가: {item.unitCost.toLocaleString()} 골드, 총: {item.totalCost.toLocaleString()} 골드) - {item.source}
+                    </span>
                   </li>
                 ))}
               </ul>

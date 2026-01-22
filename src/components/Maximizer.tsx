@@ -41,11 +41,11 @@ const Maximizer = () => {
             {MATERIAL_NAMES.map((name) => (
               <Col md={6} key={name}>
                 <Form.Group className="mb-3" controlId={`inventory-${name}`}>
-                  <Form.Label>
+                  <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
                     <span style={getItemGradeStyle(name)}>
-                      <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
-                      {name}
+                      <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px' }} />
                     </span>
+                    <span style={{ marginLeft: '8px' }}>{name}</span>
                   </Form.Label>
                   <Form.Control
                     type="number"
@@ -87,11 +87,13 @@ const Maximizer = () => {
             <h6>남는 재료:</h6>
             <ul>
               {MATERIAL_NAMES.map(name => (
-                <li key={`remaining-${name}`}>
+                <li key={`remaining-${name}`} style={{ display: 'flex', alignItems: 'center' }}>
                   <span style={getItemGradeStyle(name)}>
-                    <img src={getImagePath(name)} alt={name} style={{ width: '20px', height: '20px', marginRight: '5px' }} />
-                    {name}
-                  </span>: {Math.floor(result.remainingInventory[name]).toLocaleString()}개
+                    <img src={getImagePath(name)} alt={name} style={{ width: '20px', height: '20px' }} />
+                  </span>
+                  <span style={{ marginLeft: '5px' }}>
+                    {name}: {Math.floor(result.remainingInventory[name]).toLocaleString()}개
+                  </span>
                 </li>
               ))}
             </ul>

@@ -26,7 +26,6 @@ export const getItemGradeStyle = (itemName: MaterialName | CraftableItem): React
   const background = GRADE_BACKGROUNDS[grade];
   return {
     background: background,
-    borderRadius: '4px', // 이미지 테두리 둥글게
     padding: '2px',      // 이미지와 배경 사이 여백
     display: 'inline-flex', // 이미지와 텍스트 정렬
     alignItems: 'center',

@@ -111,11 +111,11 @@ const ComprehensiveCalculator = () => {
             {MATERIAL_NAMES.map((name) => (
               <Col md={6} key={`inv-${name}`}>
                   <Form.Group className="mb-3" controlId={`inventory-${name}`}>
-                    <Form.Label>
+                    <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
                       <span style={getItemGradeStyle(name)}>
-                        <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
-                        {name}
+                        <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px' }} />
                       </span>
+                      <span style={{ marginLeft: '8px' }}>{name}</span>
                     </Form.Label>
                     <Form.Control
                     type="number"
@@ -149,11 +149,11 @@ const ComprehensiveCalculator = () => {
               {PURCHASABLE_MATERIALS.map((name) => (
                 <Col md={6} key={`price-${name}`}>
                   <Form.Group className="mb-3" controlId={`price-${name}`}>
-                    <Form.Label>
+                    <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
                       <span style={getItemGradeStyle(name)}>
-                        <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
-                        {name}
+                        <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px' }} />
                       </span>
+                      <span style={{ marginLeft: '8px' }}>{name}</span>
                     </Form.Label>
                     <Form.Control
                     type="number"
@@ -190,11 +190,11 @@ const ComprehensiveCalculator = () => {
             {RECIPES.map(recipe => (
               <Col md={6} key={`fusionPrice-${recipe.name}`}>
                 <Form.Group className="mb-3" controlId={`fusionPrice-${recipe.name}`}>
-                  <Form.Label>
+                  <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
                     <span style={getItemGradeStyle(recipe.name)}>
-                      <img src={getImagePath(recipe.name)} alt={recipe.name} style={{ width: '24px', height: '24px', marginRight: '8px' }} />
-                      {recipe.name} 시장 가격 (1개당)
+                      <img src={getImagePath(recipe.name)} alt={recipe.name} style={{ width: '24px', height: '24px' }} />
                     </span>
+                    <span style={{ marginLeft: '8px' }}>{recipe.name} 시장 가격 (1개당)</span>
                   </Form.Label>
                   <Form.Control
                     type="number"
