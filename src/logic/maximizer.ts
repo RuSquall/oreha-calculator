@@ -56,9 +56,7 @@ export const calculateMaxCrafts = (
     let stage2Crafts = 0;
     let low = 0;
     // Set a reasonable upper bound for crafts to prevent infinite loops
-    let high = Math.floor(res1['목재'] / oRecipe.A + res1['아비도스 목재'] / oRecipe.C) + 1000; 
-
-    let best_aToP = 0, best_bToP = 0, best_pToC = 0;
+    let high = Math.floor(res1['목재'] / oRecipe.A + res1['아비도스 목재'] / oRecipe.C) + 1000;
 
     while (low <= high) {
       const mid = Math.floor((low + high) / 2);
@@ -130,7 +128,6 @@ export const calculateMaxCrafts = (
       
       const neededB = stage2Crafts * oRecipe.B;
       const availableB_for_powder = res1['부드러운 목재'] - neededB;
-      const powderFromB = Math.floor(Math.max(0, availableB_for_powder) / EX.FROM_SOFT_TO_POWDER.fromAmount);
       const bToP_to_use = Math.ceil(Math.max(0, powderDeficit) / EX.FROM_SOFT_TO_POWDER.toAmount);
       let bToP_count = bToP_to_use > 0 ? bToP_to_use : 0;
 
