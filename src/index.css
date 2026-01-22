@@ -1,3 +1,31 @@
+:root {
+  --bg-color: #f0f2f5;
+  --text-color: #212529;
+  --component-bg: #ffffff;
+  --border-color: #dee2e6;
+  --link-color: #0d6efd;
+  --link-hover-bg: #e9ecef;
+  --input-bg: #ffffff;
+  --input-text: #212529;
+  --btn-bg: #f8f9fa;
+  --btn-text: #212529;
+  --btn-hover-bg: #e2e6ea;
+}
+
+.dark-mode {
+  --bg-color: #121212;
+  --text-color: #e0e0e0;
+  --component-bg: #1e1e1e;
+  --border-color: #343a40;
+  --link-color: #0d6efd;
+  --link-hover-bg: #343a40;
+  --input-bg: #2b2b2b;
+  --input-text: #e0e0e0;
+  --btn-bg: #343a40;
+  --btn-text: #e0e0e0;
+  --btn-hover-bg: #495057;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -5,9 +33,43 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* General component styles using variables */
+.card, .form-control, .nav-tabs .nav-link, .btn, .list-group-item {
+  background-color: var(--component-bg) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+.form-control {
+    background-color: var(--input-bg) !important;
+    color: var(--input-text) !important;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: var(--link-color) !important;
+    color: white !important;
+    border-color: var(--link-color) !important;
+}
+
+.nav-tabs .nav-link:not(.active):hover {
+    background-color: var(--link-hover-bg) !important;
+}
+
+.btn {
+    background-color: var(--btn-bg) !important;
+    color: var(--btn-text) !important;
+}
+
+.btn:hover {
+    background-color: var(--btn-hover-bg) !important;
 }

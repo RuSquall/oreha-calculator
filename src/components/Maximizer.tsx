@@ -4,18 +4,19 @@ import { MaterialName, MaximizerResult, Inventory } from '../types/data';
 import { MATERIAL_NAMES, RECIPES } from '../logic/constants';
 import { calculateMaxCrafts } from '../logic/maximizer';
 import { getItemGradeStyle } from '../logic/grades';
+import { useTheme } from '../context/ThemeContext';
 
 const getImagePath = (itemName: string): string => {
-  // 파일명 규칙에 따라 공백을 언더스코어로 변경
   const fileName = itemName.replace(/ /g, '_');
   return `/${fileName}.png`;
 };
 
 const Maximizer = () => {
+  const { theme } = useTheme();
   const [inventory, setInventory] = useState<Inventory>(
     MATERIAL_NAMES.reduce((acc, name) => ({ ...acc, [name]: 0 }), {} as Inventory)
   );
-  const [results, setResults] = useState<MaximizerResult[] | null>(null); // Changed to array
+  const [results, setResults] = useState<MaximizerResult[] | null>(null);
 
   const handleInventoryChange = (name: MaterialName, value: string) => {
     setInventory({
@@ -29,7 +30,7 @@ const Maximizer = () => {
     const allResults: MaximizerResult[] = RECIPES.map(recipe => {
       return calculateMaxCrafts(inventory, recipe.name);
     });
-    setResults(allResults); // Set array of results
+    setResults(allResults);
   };
 
   return (
@@ -38,26 +39,29 @@ const Maximizer = () => {
         <Form onSubmit={handleSubmit}>
           <h5 className="card-title text-center mb-4">1. 보유 재료 입력</h5>
           <Row>
-            {MATERIAL_NAMES.map((name) => (
-              <Col md={6} key={name}>
-                <Form.Group className="mb-3" controlId={`inventory-${name}`}>
-                  <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
-                    <span style={getItemGradeStyle(name)}>
-                      <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px' }} />
-                    </span>
-                    <span style={{ marginLeft: '8px' }}>{name}</span>
-                  </Form.Label>
-                  <Form.Control
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={inventory[name] === 0 ? '' : inventory[name]}
-                    onChange={(e) => handleInventoryChange(name, e.target.value)}
-                    placeholder="보유 수량"
-                  />
-                </Form.Group>
-              </Col>
-            ))}
+            {MATERIAL_NAMES.map((name) => {
+              const gradeStyle = getItemGradeStyle(name, theme);
+              return (
+                <Col md={6} key={name}>
+                  <Form.Group className="mb-3" controlId={`inventory-${name}`}>
+                    <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={gradeStyle}>
+                        <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px' }} />
+                      </span>
+                      <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{name}</span>
+                    </Form.Label>
+                    <Form.Control
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={inventory[name] === 0 ? '' : inventory[name]}
+                      onChange={(e) => handleInventoryChange(name, e.target.value)}
+                      placeholder="보유 수량"
+                    />
+                  </Form.Group>
+                </Col>
+              );
+            })}
           </Row>
           
           <div className="d-grid mt-4">
@@ -67,38 +71,45 @@ const Maximizer = () => {
           </div>
         </Form>
 
-        {results && results.map((result, index) => (
-          <Alert key={index} variant="info" className="mt-4">
-            <Alert.Heading>{RECIPES[index].name} 최대 생산량 계산 결과</Alert.Heading>
-            <hr />
-            <p className="mb-3 h4">
-              <strong>최대 {result.maxCrafts / 10}회 ({result.maxCrafts}개) 제작 가능</strong>
-            </p>
-            {result.exchangeSteps.length > 0 && (
-              <>
-                <h6>필요 교환 목록:</h6>
-                <ul>
-                  {result.exchangeSteps.map((step, stepIndex) => (
-                    <li key={stepIndex}>{step}</li>
-                  ))}
-                </ul>
-              </>
-            )}
-            <h6>남는 재료:</h6>
-            <ul>
-              {MATERIAL_NAMES.map(name => (
-                <li key={`remaining-${name}`} style={{ display: 'flex', alignItems: 'center' }}>
-                  <span style={getItemGradeStyle(name)}>
-                    <img src={getImagePath(name)} alt={name} style={{ width: '20px', height: '20px' }} />
-                  </span>
-                  <span style={{ marginLeft: '5px' }}>
-                    {name}: {Math.floor(result.remainingInventory[name]).toLocaleString()}개
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </Alert>
-        ))}
+        {results && results.map((result, index) => {
+          const recipeName = RECIPES[index].name;
+          const titleGradeStyle = getItemGradeStyle(recipeName, theme);
+          return (
+            <Alert key={index} variant="info" className="mt-4">
+              <Alert.Heading style={{ color: titleGradeStyle.color }}>{recipeName} 최대 생산량 계산 결과</Alert.Heading>
+              <hr />
+              <p className="mb-3 h4">
+                <strong>최대 {result.maxCrafts / 10}회 ({result.maxCrafts}개) 제작 가능</strong>
+              </p>
+              {result.exchangeSteps.length > 0 && (
+                <>
+                  <h6>필요 교환 목록:</h6>
+                  <ul>
+                    {result.exchangeSteps.map((step, stepIndex) => (
+                      <li key={stepIndex}>{step}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              <h6>남는 재료:</h6>
+              <ul>
+                {MATERIAL_NAMES.map(name => {
+                  const gradeStyle = getItemGradeStyle(name, theme);
+                  return (
+                    <li key={`remaining-${name}`} style={{ display: 'flex', alignItems: 'center', color: gradeStyle.color }}>
+                      <span style={gradeStyle}>
+                        <img src={getImagePath(name)} alt={name} style={{ width: '20px', height: '20px' }} />
+                      </span>
+                      <span style={{ marginLeft: '5px' }}>
+                        {name}: {Math.floor(result.remainingInventory[name]).toLocaleString()}개
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </Alert>
+          );
+        })}
       </Card.Body>
     </Card>
   );

@@ -1,14 +1,5 @@
-// src/logic/grades.ts
-
+import React from 'react';
 import { MaterialName, CraftableItem } from '../types/data';
-
-// 등급별 배경 CSS 그라데이션
-export const GRADE_BACKGROUNDS: Record<string, string> = {
-  '일반': 'linear-gradient(135deg,#232323,#575757)',
-  '고급': 'linear-gradient(135deg,#18220b,#304911)',
-  '희귀': 'linear-gradient(135deg,#111f2c,#113d5d)',
-  '영웅': 'linear-gradient(135deg,#261331,#480d5d)',
-};
 
 // 재료별 등급 매핑
 export const MATERIAL_GRADES: Record<MaterialName | CraftableItem, string> = {
@@ -21,13 +12,67 @@ export const MATERIAL_GRADES: Record<MaterialName | CraftableItem, string> = {
   '상급 아비도스 융화 재료': '영웅',
 };
 
-export const getItemGradeStyle = (itemName: MaterialName | CraftableItem): React.CSSProperties => {
-  const grade = MATERIAL_GRADES[itemName];
-  const background = GRADE_BACKGROUNDS[grade];
+// Define styles for both light and dark themes
+const GRADE_STYLES: {
+  [key: string]: {
+    light: React.CSSProperties;
+    dark: React.CSSProperties;
+  };
+} = {
+  '일반': {
+    light: {
+      background: 'linear-gradient(135deg, #e9ecef, #f8f9fa)',
+      color: '#343a40',
+    },
+    dark: {
+      background: 'linear-gradient(135deg,#232323,#575757)',
+      color: '#ffffff',
+    },
+  },
+  '고급': {
+    light: {
+      background: 'linear-gradient(135deg, #d4edda, #f0fff4)',
+      color: '#155724',
+    },
+    dark: {
+      background: 'linear-gradient(135deg,#18220b,#304911)',
+      color: '#91fe02',
+    },
+  },
+  '희귀': {
+    light: {
+      background: 'linear-gradient(135deg, #cce5ff, #e7f5ff)',
+      color: '#004085',
+    },
+    dark: {
+      background: 'linear-gradient(135deg,#111f2c,#113d5d)',
+      color: '#00b5ff',
+    },
+  },
+  '영웅': {
+    light: {
+      background: 'linear-gradient(135deg, #e2d9f3, #f3eefc)',
+      color: '#563d7c',
+    },
+    dark: {
+      background: 'linear-gradient(135deg,#261331,#480d5d)',
+      color: '#bf00fe',
+    },
+  },
+};
+
+export const getItemGradeStyle = (
+  itemName: MaterialName | CraftableItem,
+  theme: 'light' | 'dark'
+): React.CSSProperties => {
+  const grade = MATERIAL_GRADES[itemName] || '일반';
+  const themeStyle = GRADE_STYLES[grade]?.[theme] || GRADE_STYLES[grade]?.light;
+
+  // Combine theme styles with existing layout styles
   return {
-    background: background,
-    padding: '2px',      // 이미지와 배경 사이 여백
-    display: 'inline-flex', // 이미지와 텍스트 정렬
+    ...themeStyle,
+    padding: '2px',
+    display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     boxSizing: 'border-box',
