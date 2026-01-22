@@ -1,0 +1,41 @@
+## 오늘 작업 요약 (2026년 1월 22일)
+
+오늘 세션에서는 주로 UI/UX 개선, 테마 시스템 구현, 그리고 발생한 빌드 오류 수정에 집중했습니다.
+
+**1. 배포 준비 작업:**
+*   `package.json` 빌드 스크립트를 수정하여 프로덕션 빌드 시 소스맵 생성을 비활성화했습니다.
+*   `public/index.html` 파일에 웹사이트 제목, 메타 설명, Open Graph 태그를 추가하여 SEO 및 소셜 미디어 공유를 개선했습니다.
+*   `public/index.html` 파일의 파비콘 링크를 `상급_아비도스_융화_재료.png`로 임시 변경했습니다.
+
+**2. UI/UX 및 테마 시스템 구현:**
+*   **테마 컨텍스트 생성:** `src/context/ThemeContext.tsx` 파일을 생성하여 앱 전반에 걸쳐 테마 상태(라이트/다크)를 관리하고 제공하는 시스템을 구축했습니다.
+*   **테마 프로바이더 적용:** `src/index.tsx`에서 `App` 컴포넌트를 `ThemeProvider`로 감싸 앱 전체에 테마를 적용할 수 있도록 했습니다.
+*   **글로벌 CSS 변수 정의:** `src/index.css` 파일에 라이트/다크 테마를 위한 CSS 변수를 정의하고, `body` 태그 및 주요 Bootstrap 컴포넌트에 적용했습니다.
+*   **테마 토글 버튼 추가:** `App.tsx`에 테마 전환 버튼을 추가하여 사용자가 직접 테마를 변경할 수 있도록 했습니다.
+*   **등급별 스타일 로직 개선:** `src/logic/grades.ts` 파일을 리팩토링하여 `getItemGradeStyle` 함수가 현재 테마에 따라 아이템 이름의 텍스트 색상을 동적으로 변경하고, 아이템 아이콘의 배경색은 등급에 따라 고정된 색상을 유지하도록 했습니다.
+*   **컴포넌트 테마 적용:** `Calculator.tsx`, `Maximizer.tsx`, `ComprehensiveCalculator.tsx`의 모든 아이템 표시 부분에 새로운 테마 컨텍스트와 등급별 스타일링 로직을 적용했습니다.
+
+**3. 테마 시스템 세부 조정:**
+*   `src/context/ThemeContext.tsx`에서 앱 초기 로드 시 기본 테마를 다크 모드로 설정하도록 변경했습니다.
+*   `src/index.css`에서 입력 필드의 placeholder 텍스트 색상을 더 밝은 회색(`_#adb5bd_`)으로 조정하여 가독성을 높였습니다.
+*   `src/index.css`에서 `body` 태그의 `background-color`에 `!important`를 추가하고 `html, body, #root`에 `min-height: 100vh`를 적용하여 다크 모드 배경색이 화면 전체에 확실하게 적용되도록 수정했습니다.
+
+**4. '최대 생산량 계산기' (Maximizer) 레이아웃 및 기능 개선:**
+*   `App.tsx`에서 메인 콘텐츠 영역의 너비를 확장(`md={12}`)하고, '최대 생산량 계산기' 탭의 순서를 '종합 분석 계산기' 뒤로 변경했습니다.
+*   `Maximizer.tsx` 컴포넌트를 좌우 2단 레이아웃으로 전면 리팩토링했습니다. 왼쪽에는 입력 폼, 오른쪽에는 결과 창이 배치됩니다.
+*   입력 필드들을 한 줄에 하나씩 표시되도록 변경했습니다.
+*   결과 창이 항상 표시되도록 `results` 상태를 기본값으로 초기화했습니다.
+*   결과 창에서 '남는 재료' 섹션을 제거했습니다.
+*   결과 헤딩에 아이템 이미지와 등급별 배경색을 추가했습니다.
+*   결과 `Alert` 컴포넌트의 배경색을 테마에 맞게 `var(--component-bg)`로 변경했습니다.
+*   "최대 X회 (Y개) 제작 가능" 텍스트의 색상을 `var(--text-color)`로 변경하여 다크 모드에서 가독성을 높였습니다.
+*   `src/types/data.ts`에 `ExchangeStepDetail` 인터페이스를 추가하고 `MaximizerResult`가 이를 사용하도록 업데이트했습니다.
+*   `src/logic/maximizer.ts`에서 `exchangeSteps`를 `ExchangeStepDetail` 객체 배열로 생성하도록 로직을 변경했습니다.
+*   `Maximizer.tsx`에서 `ExchangeStepDetail` 객체를 이미지와 등급 스타일을 포함한 요청 형식으로 렌더링하도록 수정했습니다.
+
+**5. 빌드 오류 수정:**
+*   `src/components/Maximizer.tsx`에서 `toGradePath` 오타를 `toGradeStyle`로 수정했습니다.
+*   `src/types/data.ts`에서 `ComprehensiveAnalysisResult` 인터페이스의 `craftSellExchangeSteps` 및 `craftUseExchangeSteps` 타입을 `string[]`에서 `ExchangeStepDetail[]`로 변경하여 타입 불일치 오류를 해결했습니다.
+*   `src/components/ComprehensiveCalculator.tsx`에서 `craftSellExchangeSteps`의 렌더링 로직을 수정하여 `ExchangeStepDetail` 객체를 올바르게 표시하도록 했습니다.
+
+---

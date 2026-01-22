@@ -52,51 +52,105 @@ export const calculateMaxCrafts = (
     remaining['부드러운 목재'] -= stage1Crafts * oRecipe.B;
     remaining['아비도스 목재'] -= stage1Crafts * oRecipe.C;
 
-    const maxAtoP = Math.floor(remaining['목재'] / EX.FROM_TIMBER_TO_POWDER.fromAmount);
-    for (let aToP_count = 0; aToP_count <= maxAtoP; aToP_count++) {
-      const maxBtoP = Math.floor(remaining['부드러운 목재'] / EX.FROM_SOFT_TO_POWDER.fromAmount);
-      for (let bToP_count = 0; bToP_count <= maxBtoP; bToP_count++) {
-        
-        let currentP = remaining['벌목의 가루'] 
-            + (aToP_count * EX.FROM_TIMBER_TO_POWDER.toAmount)
-            + (bToP_count * EX.FROM_SOFT_TO_POWDER.toAmount);
-        
-        const pToC_count = Math.floor(currentP / EX.FROM_POWDER_TO_ABIDOS.fromAmount);
-        
-        let currentA = remaining['목재'] - (aToP_count * EX.FROM_TIMBER_TO_POWDER.fromAmount);
-        let currentB = remaining['부드러운 목재'] - (bToP_count * EX.FROM_SOFT_TO_POWDER.fromAmount);
-        let currentC = remaining['아비도스 목재'] + (pToC_count * EX.FROM_POWDER_TO_ABIDOS.toAmount);
-        
-        let stage2Crafts = Infinity;
-        if (oRecipe.A > 0) stage2Crafts = Math.min(stage2Crafts, Math.floor(currentA / oRecipe.A));
-        if (oRecipe.B > 0) stage2Crafts = Math.min(stage2Crafts, Math.floor(currentB / oRecipe.B));
-        if (oRecipe.C > 0) stage2Crafts = Math.min(stage2Crafts, Math.floor(currentC / oRecipe.C));
-        if (stage2Crafts === Infinity) stage2Crafts = 0;
-        stage2Crafts = Math.floor(stage2Crafts / 10) * 10; // Ensure it's a multiple of 10
+    // --- START: New optimized calculation logic with Binary Search ---
+    let stage2Crafts = 0;
+    let low = 0;
+    // Set a reasonable upper bound for crafts to prevent infinite loops
+    let high = Math.floor(res1['목재'] / oRecipe.A + res1['아비도스 목재'] / oRecipe.C) + 1000; 
 
-        const totalCrafts = stage1Crafts + stage2Crafts;
+    let best_aToP = 0, best_bToP = 0, best_pToC = 0;
 
-        if (totalCrafts > maxCrafts) {
-          maxCrafts = totalCrafts;
-          bestExchanges = {
-            ...initialExchanges,
-            BtoA: bToA_count,
-            AtoP: aToP_count,
-            BtoP: bToP_count,
-            PtoC: pToC_count,
-          };
-          
-          // Recalculate final inventory for the best case
-          const finalP = currentP - (pToC_count * EX.FROM_POWDER_TO_ABIDOS.fromAmount);
-          finalInventory = {
-             '아비도스 목재': currentC - stage2Crafts * oRecipe.C,
-             '부드러운 목재': currentB - stage2Crafts * oRecipe.B,
-             '목재': currentA - stage2Crafts * oRecipe.A,
-             '튼튼한 목재': remaining['튼튼한 목재'],
-             '벌목의 가루': finalP,
-          };
-        }
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      if (mid === 0) {
+        low = mid + 1;
+        continue;
       }
+
+      const crafts_to_check = mid;
+      const neededA = crafts_to_check * oRecipe.A;
+      const neededB = crafts_to_check * oRecipe.B;
+      const neededC = crafts_to_check * oRecipe.C;
+
+      // Check if we have enough B material, as it cannot be created.
+      if (res1['부드러운 목재'] < neededB) {
+        high = mid - 1;
+        continue;
+      }
+
+      const deficitC = Math.max(0, neededC - remaining['아비도스 목재']);
+      const pToC_needed_count = Math.ceil(deficitC / EX.FROM_POWDER_TO_ABIDOS.toAmount);
+      const powderForC = pToC_needed_count * EX.FROM_POWDER_TO_ABIDOS.fromAmount;
+      const powderDeficit = Math.max(0, powderForC - remaining['벌목의 가루']);
+
+      const timberForCrafts = neededA;
+      const softWoodForCrafts = neededB;
+
+      const availableA_for_powder = res1['목재'] - timberForCrafts;
+      const availableB_for_powder = res1['부드러운 목재'] - softWoodForCrafts;
+
+      if (availableA_for_powder < 0) {
+          high = mid - 1;
+          continue;
+      }
+
+      // Prioritize converting Soft Wood to Powder as it's more efficient, but we assume it's more valuable.
+      // Let's use Timber first.
+      const powderFromA = Math.floor(availableA_for_powder / EX.FROM_TIMBER_TO_POWDER.fromAmount) * EX.FROM_TIMBER_TO_POWDER.toAmount;
+      const powderFromB = Math.floor(availableB_for_powder / EX.FROM_SOFT_TO_POWDER.fromAmount) * EX.FROM_SOFT_TO_POWDER.toAmount;
+
+      if (powderDeficit <= powderFromA + powderFromB) {
+        stage2Crafts = crafts_to_check;
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+    
+    stage2Crafts = Math.floor(stage2Crafts / 10) * 10;
+
+    const totalCrafts = stage1Crafts + stage2Crafts;
+
+    if (totalCrafts > maxCrafts) {
+      maxCrafts = totalCrafts;
+
+      // Recalculate the exchange counts for the best case
+      const neededC = stage2Crafts * oRecipe.C;
+      const deficitC = Math.max(0, neededC - remaining['아비도스 목재']);
+      const pToC_count = Math.ceil(deficitC / EX.FROM_POWDER_TO_ABIDOS.toAmount);
+      const powderForC = pToC_count * EX.FROM_POWDER_TO_ABIDOS.fromAmount;
+      let powderDeficit = Math.max(0, powderForC - remaining['벌목의 가루']);
+
+      const neededA = stage2Crafts * oRecipe.A;
+      const availableA_for_powder = res1['목재'] - neededA;
+      const powderFromA = Math.floor(Math.max(0, availableA_for_powder) / EX.FROM_TIMBER_TO_POWDER.fromAmount);
+      const aToP_to_use = Math.ceil(Math.min(powderDeficit, powderFromA * EX.FROM_TIMBER_TO_POWDER.toAmount) / EX.FROM_TIMBER_TO_POWDER.toAmount);
+      let aToP_count = aToP_to_use > 0 ? aToP_to_use : 0;
+      powderDeficit -= aToP_count * EX.FROM_TIMBER_TO_POWDER.toAmount;
+      
+      const neededB = stage2Crafts * oRecipe.B;
+      const availableB_for_powder = res1['부드러운 목재'] - neededB;
+      const powderFromB = Math.floor(Math.max(0, availableB_for_powder) / EX.FROM_SOFT_TO_POWDER.fromAmount);
+      const bToP_to_use = Math.ceil(Math.max(0, powderDeficit) / EX.FROM_SOFT_TO_POWDER.toAmount);
+      let bToP_count = bToP_to_use > 0 ? bToP_to_use : 0;
+
+      bestExchanges = {
+        ...initialExchanges,
+        BtoA: bToA_count,
+        AtoP: aToP_count,
+        BtoP: bToP_count,
+        PtoC: pToC_count,
+      };
+      
+      const currentP = remaining['벌목의 가루'] + aToP_count * EX.FROM_TIMBER_TO_POWDER.toAmount + bToP_count * EX.FROM_SOFT_TO_POWDER.toAmount;
+      const finalP = currentP - pToC_count * EX.FROM_POWDER_TO_ABIDOS.fromAmount;
+      finalInventory = {
+         '아비도스 목재': remaining['아비도스 목재'] + pToC_count * EX.FROM_POWDER_TO_ABIDOS.toAmount - stage2Crafts * oRecipe.C,
+         '부드러운 목재': remaining['부드러운 목재'] - bToP_count * EX.FROM_SOFT_TO_POWDER.fromAmount - stage2Crafts * oRecipe.B,
+         '목재': remaining['목재'] - aToP_count * EX.FROM_TIMBER_TO_POWDER.fromAmount - stage2Crafts * oRecipe.A,
+         '튼튼한 목재': resources['튼튼한 목재'],
+         '벌목의 가루': finalP,
+      };
     }
   }
   
