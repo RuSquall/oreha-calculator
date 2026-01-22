@@ -27,9 +27,17 @@ export interface CalculationResult {
   };
 }
 
+export interface ExchangeStepDetail {
+  fromMaterial: MaterialName;
+  fromAmount: number;
+  toMaterial: MaterialName;
+  toAmount: number;
+  count: number; // Number of times this specific exchange was performed
+}
+
 export interface MaximizerResult {
   maxCrafts: number;
-  exchangeSteps: string[];
+  exchangeSteps: ExchangeStepDetail[]; // Changed to structured detail
   remainingInventory: Record<MaterialName, number>;
 }
 

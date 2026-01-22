@@ -1,4 +1,4 @@
-import { MaterialName, CraftableItem, MaximizerResult } from '../types/data';
+import { MaterialName, CraftableItem, MaximizerResult, ExchangeStepDetail } from '../types/data';
 import { RECIPES, DISCRETE_EXCHANGES as EX } from './constants';
 
 type Inventory = Record<MaterialName, number>;
@@ -100,17 +100,62 @@ export const calculateMaxCrafts = (
     }
   }
   
-  const transformationMap: {[key: string]: string} = {
-    StoA: `${EX.FROM_STURDY_TO_TIMBER.fromAmount} ${EX.FROM_STURDY_TO_TIMBER.from} -> ${EX.FROM_STURDY_TO_TIMBER.toAmount} ${EX.FROM_STURDY_TO_TIMBER.to}`,
-    BtoA: `${EX.FROM_SOFT_TO_TIMBER.fromAmount} ${EX.FROM_SOFT_TO_TIMBER.from} -> ${EX.FROM_SOFT_TO_TIMBER.toAmount} ${EX.FROM_SOFT_TO_TIMBER.to}`,
-    AtoP: `${EX.FROM_TIMBER_TO_POWDER.fromAmount} ${EX.FROM_TIMBER_TO_POWDER.from} -> ${EX.FROM_TIMBER_TO_POWDER.toAmount} ${EX.FROM_TIMBER_TO_POWDER.to}`,
-    BtoP: `${EX.FROM_SOFT_TO_POWDER.fromAmount} ${EX.FROM_SOFT_TO_POWDER.from} -> ${EX.FROM_SOFT_TO_POWDER.toAmount} ${EX.FROM_SOFT_TO_POWDER.to}`,
-    PtoC: `${EX.FROM_POWDER_TO_ABIDOS.fromAmount} ${EX.FROM_POWDER_TO_ABIDOS.from} -> ${EX.FROM_POWDER_TO_ABIDOS.toAmount} ${EX.FROM_POWDER_TO_ABIDOS.to}`,
-  };
+  const finalSteps: ExchangeStepDetail[] = [];
 
-  const finalSteps = Object.entries(bestExchanges)
-    .filter(([_, value]) => value > 0)
-    .map(([key, value]) => `${transformationMap[key]} (x${value}회)`);
+  // StoA (Sturdy to Timber)
+  if (bestExchanges['StoA'] > 0) {
+    finalSteps.push({
+      fromMaterial: EX.FROM_STURDY_TO_TIMBER.from,
+      fromAmount: EX.FROM_STURDY_TO_TIMBER.fromAmount,
+      toMaterial: EX.FROM_STURDY_TO_TIMBER.to,
+      toAmount: EX.FROM_STURDY_TO_TIMBER.toAmount,
+      count: bestExchanges['StoA'],
+    });
+  }
+
+  // BtoA (Soft to Timber)
+  if (bestExchanges['BtoA'] > 0) {
+    finalSteps.push({
+      fromMaterial: EX.FROM_SOFT_TO_TIMBER.from,
+      fromAmount: EX.FROM_SOFT_TO_TIMBER.fromAmount,
+      toMaterial: EX.FROM_SOFT_TO_TIMBER.to,
+      toAmount: EX.FROM_SOFT_TO_TIMBER.toAmount,
+      count: bestExchanges['BtoA'],
+    });
+  }
+
+  // AtoP (Timber to Powder)
+  if (bestExchanges['AtoP'] > 0) {
+    finalSteps.push({
+      fromMaterial: EX.FROM_TIMBER_TO_POWDER.from,
+      fromAmount: EX.FROM_TIMBER_TO_POWDER.fromAmount,
+      toMaterial: EX.FROM_TIMBER_TO_POWDER.to,
+      toAmount: EX.FROM_TIMBER_TO_POWDER.toAmount,
+      count: bestExchanges['AtoP'],
+    });
+  }
+
+  // BtoP (Soft to Powder)
+  if (bestExchanges['BtoP'] > 0) {
+    finalSteps.push({
+      fromMaterial: EX.FROM_SOFT_TO_POWDER.from,
+      fromAmount: EX.FROM_SOFT_TO_POWDER.fromAmount,
+      toMaterial: EX.FROM_SOFT_TO_POWDER.to,
+      toAmount: EX.FROM_SOFT_TO_POWDER.toAmount,
+      count: bestExchanges['BtoP'],
+    });
+  }
+
+  // PtoC (Powder to Abidos)
+  if (bestExchanges['PtoC'] > 0) {
+    finalSteps.push({
+      fromMaterial: EX.FROM_POWDER_TO_ABIDOS.from,
+      fromAmount: EX.FROM_POWDER_TO_ABIDOS.fromAmount,
+      toMaterial: EX.FROM_POWDER_TO_ABIDOS.to,
+      toAmount: EX.FROM_POWDER_TO_ABIDOS.toAmount,
+      count: bestExchanges['PtoC'],
+    });
+  }
 
   return {
     maxCrafts: maxCrafts,

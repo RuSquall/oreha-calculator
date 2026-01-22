@@ -102,15 +102,30 @@ const Maximizer = () => {
               </Alert.Heading>
               <hr />
               <p className="mb-3 h4">
-                <strong>최대 {result.maxCrafts / 10}회 ({result.maxCrafts}개) 제작 가능</strong>
+                <strong style={{ color: 'var(--text-color)' }}>최대 {result.maxCrafts / 10}회 ({result.maxCrafts}개) 제작 가능</strong>
               </p>
               {result.exchangeSteps.length > 0 && (
                 <>
                   <h6>필요 교환 목록:</h6>
                   <ul>
-                    {result.exchangeSteps.map((step, stepIndex) => (
-                      <li key={stepIndex}>{step}</li>
-                    ))}
+                    {result.exchangeSteps.map((step, stepIndex) => {
+                      const fromGradeStyle = getItemGradeStyle(step.fromMaterial, theme);
+                      const toGradeStyle = getItemGradeStyle(step.toMaterial, theme);
+                      return (
+                        <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                          <span style={fromGradeStyle}>
+                            <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '20px', height: '20px' }} />
+                          </span>
+                          <span style={{ marginLeft: '5px', color: fromGradeStyle.color }}>{step.fromMaterial} x{step.fromAmount}</span>
+                          <span style={{ margin: '0 5px' }}> → </span>
+                          <span style={toGradePath}>
+                            <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '20px', height: '20px' }} />
+                          </span>
+                          <span style={{ marginLeft: '5px', color: toGradeStyle.color }}>{step.toMaterial} x{step.toAmount}</span>
+                          <span style={{ marginLeft: '5px' }}> (x{step.count}회)</span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </>
               )}
