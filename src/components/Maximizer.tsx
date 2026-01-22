@@ -87,8 +87,19 @@ const Maximizer = () => {
           const recipeName = RECIPES[index].name;
           const titleGradeStyle = getItemGradeStyle(recipeName, theme);
           return (
-            <Alert key={index} variant="info" className="mb-3"> {/* Added mb-3 for spacing between alerts */}
-              <Alert.Heading style={{ color: titleGradeStyle.color }}>{recipeName} 최대 생산량 계산 결과</Alert.Heading>
+            <Alert
+              key={index}
+              className="mb-3"
+              style={{ backgroundColor: 'var(--component-bg)', borderColor: 'var(--border-color)' }}
+            >
+              <Alert.Heading>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span style={titleGradeStyle}>
+                    <img src={getImagePath(recipeName)} alt={recipeName} style={{ width: '24px', height: '24px' }} />
+                  </span>
+                  <span style={{ marginLeft: '8px', color: titleGradeStyle.color }}>{recipeName} 최대 생산량 계산 결과</span>
+                </div>
+              </Alert.Heading>
               <hr />
               <p className="mb-3 h4">
                 <strong>최대 {result.maxCrafts / 10}회 ({result.maxCrafts}개) 제작 가능</strong>
