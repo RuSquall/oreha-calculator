@@ -66,11 +66,17 @@ export const getItemGradeStyle = (
   theme: 'light' | 'dark'
 ): React.CSSProperties => {
   const grade = MATERIAL_GRADES[itemName] || '일반';
+  
+  // Style for the current theme (mainly for text color)
   const themeStyle = GRADE_STYLES[grade]?.[theme] || GRADE_STYLES[grade]?.light;
+  
+  // Style for the dark theme (for the static background)
+  const darkStyle = GRADE_STYLES[grade]?.dark;
 
-  // Combine theme styles with existing layout styles
+  // Combine styles: static background, dynamic color, and layout styles
   return {
-    ...themeStyle,
+    background: darkStyle.background, // Always use the dark theme background
+    color: themeStyle.color, // Use the color appropriate for the current theme
     padding: '2px',
     display: 'inline-flex',
     alignItems: 'center',
