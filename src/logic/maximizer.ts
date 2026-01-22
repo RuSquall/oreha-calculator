@@ -82,10 +82,8 @@ export const calculateMaxCrafts = (
       const powderDeficit = Math.max(0, powderForC - remaining['벌목의 가루']);
 
       const timberForCrafts = neededA;
-      const softWoodForCrafts = neededB;
 
       const availableA_for_powder = res1['목재'] - timberForCrafts;
-      const availableB_for_powder = res1['부드러운 목재'] - softWoodForCrafts;
 
       if (availableA_for_powder < 0) {
           high = mid - 1;
@@ -95,7 +93,7 @@ export const calculateMaxCrafts = (
       // Prioritize converting Soft Wood to Powder as it's more efficient, but we assume it's more valuable.
       // Let's use Timber first.
       const powderFromA = Math.floor(availableA_for_powder / EX.FROM_TIMBER_TO_POWDER.fromAmount) * EX.FROM_TIMBER_TO_POWDER.toAmount;
-      const powderFromB = Math.floor(availableB_for_powder / EX.FROM_SOFT_TO_POWDER.fromAmount) * EX.FROM_SOFT_TO_POWDER.toAmount;
+      const powderFromB = Math.floor((res1['부드러운 목재'] - neededB) / EX.FROM_SOFT_TO_POWDER.fromAmount) * EX.FROM_SOFT_TO_POWDER.toAmount;
 
       if (powderDeficit <= powderFromA + powderFromB) {
         stage2Crafts = crafts_to_check;
