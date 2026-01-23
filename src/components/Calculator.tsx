@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Form, Card, Spinner, Alert } from 'react-bootstrap';
 import { PURCHASABLE_MATERIALS, RECIPES } from '../logic/constants';
-import { MaterialName, ProfitAnalysisResult, CraftableItem } from '../types/data';
+import { MaterialName, ProfitAnalysisResult, CraftableItem, ItemPrice } from '../types/data'; // Added ItemPrice
 import { analyzeCraftingProfit } from '../logic/calculator';
 import { getImagePath, getItemGradeStyle, getImageBackgroundStyle } from '../logic/grades';
 import { useTheme } from '../context/ThemeContext';
@@ -16,6 +16,65 @@ const Calculator: React.FC = () => {
   });
   const [results, setResults] = useState<Record<CraftableItem, ProfitAnalysisResult> | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // New states for API fetching
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+
+  // useEffect to fetch prices on component mount
+  useEffect(() => {
+    const fetchPrices = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await fetch('/.netlify/functions/getPrices');
+        if (!response.ok) {
+          throw new Error('서버에서 가격 정보를 가져오는 데 실패했습니다.');
+        }
+        const responseData = await response.json();
+        const apiData: Partial<Record<MaterialName, ItemPrice>> = responseData; // Assuming responseData is directly the ItemPrice map
+        
+        const newMaterialPrices: Record<MaterialName, number> = {} as Record<MaterialName, number>;
+        const newItemPrices: Record<CraftableItem, number> = {} as Record<CraftableItem, number>;
+        let updatedTime: string | null = null;
+
+        // Populate materialPrices
+        PURCHASABLE_MATERIALS.forEach(name => {
+          if (apiData[name] && apiData[name]?.CurrentMinPrice !== undefined) {
+            newMaterialPrices[name] = apiData[name]!.CurrentMinPrice;
+            if (!updatedTime) updatedTime = apiData[name]!.UpdatedAt;
+          } else {
+            newMaterialPrices[name] = 0; // Default to 0 if not found or price is undefined
+          }
+        });
+
+        // Populate itemPrices (fusion materials)
+        RECIPES.forEach(recipe => {
+          if (apiData[recipe.name as MaterialName] && apiData[recipe.name as MaterialName]?.CurrentMinPrice !== undefined) {
+            newItemPrices[recipe.name] = apiData[recipe.name as MaterialName]!.CurrentMinPrice;
+            if (!updatedTime) updatedTime = apiData[recipe.name as MaterialName]!.UpdatedAt;
+          } else {
+            newItemPrices[recipe.name] = 0; // Default to 0
+          }
+        });
+        
+        setMaterialPrices(newMaterialPrices);
+        setItemPrices(newItemPrices);
+        setLastUpdated(updatedTime);
+
+      } catch (err: any) {
+        setError(err.message);
+        setMaterialPrices({} as Record<MaterialName, number>); // Reset on error
+        setItemPrices({
+          '상급 아비도스 융화 재료': 0,
+          '아비도스 융화 재료': 0,
+        }); // Reset on error
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPrices();
+  }, []); // Empty dependency array means this runs once on mount
 
   const handlePriceChange = (name: MaterialName, value: string) => {
     setMaterialPrices(prev => ({ ...prev, [name]: Number(value) }));
@@ -98,6 +157,14 @@ const Calculator: React.FC = () => {
           <h5>입력</h5>
           <Card bg={theme} text={theme === 'dark' ? 'light' : 'dark'}>
             <Card.Body>
+              {/* New UI for loading/error/last updated */}
+              {isLoading && <Spinner animation="border" size="sm" />}
+              {error && <Alert variant="danger">오류: {error}</Alert>}
+              {lastUpdated && !isLoading && !error && (
+                <Alert variant="info" className="text-center py-2">
+                  마지막 업데이트: {new Date(lastUpdated).toLocaleString()}
+                </Alert>
+              )}
               <Form>
                 <Form.Group className="mb-3">
                   <Form.Label>제작 수수료 감소율 (%)</Form.Label>
@@ -110,7 +177,13 @@ const Calculator: React.FC = () => {
                       <img src={getImagePath(recipe.name)} alt={recipe.name} width="24" height="24" className="me-2" style={getImageBackgroundStyle(recipe.name, theme)} />
                       {recipe.name} 시장 가격 (1개당)
                     </Form.Label>
-                    <Form.Control type="number" value={itemPrices[recipe.name]} onChange={e => handleItemPriceChange(recipe.name, e.target.value)} />
+                    <Form.Control
+                      type="number"
+                      value={itemPrices[recipe.name] || ''} // Use itemPrices
+                      onChange={e => handleItemPriceChange(recipe.name, e.target.value)}
+                      placeholder={isLoading ? "불러오는 중..." : "골드"} // Add placeholder
+                      disabled={isLoading} // Disable while loading
+                    />
                   </Form.Group>
                 ))}
                 <hr />
@@ -120,7 +193,13 @@ const Calculator: React.FC = () => {
                       <img src={getImagePath(name)} alt={name} width="24" height="24" className="me-2" style={getImageBackgroundStyle(name, theme)} />
                       {name} (100개당)
                     </Form.Label>
-                    <Form.Control type="number" value={materialPrices[name] || ''} onChange={e => handlePriceChange(name, e.target.value)} />
+                    <Form.Control
+                      type="number"
+                      value={materialPrices[name] || ''} // Use materialPrices
+                      onChange={e => handlePriceChange(name, e.target.value)}
+                      placeholder={isLoading ? "불러오는 중..." : "골드"} // Add placeholder
+                      disabled={isLoading} // Disable while loading
+                    />
                   </Form.Group>
                 ))}
               </Form>

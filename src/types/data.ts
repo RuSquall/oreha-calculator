@@ -89,3 +89,4 @@ export interface MarketData {
 export interface LostArkMarketPrices {
   [key: string]: ItemPrice;
 }
+
