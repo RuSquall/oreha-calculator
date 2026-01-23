@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Button, Card, Row, Col, Alert, Spinner } from 'react-bootstrap';
-import { MaterialName, CraftableItem, Inventory, ComprehensiveAnalysisResult, ItemPrice } from '../types/data';
+import { MaterialName, CraftableItem, Inventory, ComprehensiveAnalysisResult } from '../types/data'; // Removed ItemPrice
 import { MATERIAL_NAMES, PURCHASABLE_MATERIALS, RECIPES } from '../logic/constants';
 import { analyzeComprehensiveProfit } from '../logic/comprehensiveCalculator';
 import { getItemGradeStyle, getImagePath, getImageBackgroundStyle } from '../logic/grades'; // Updated import
+import { Row, Col, Form, Card, Spinner, Alert, Button } from 'react-bootstrap';
+import React, { useState, useEffect} from 'react';
 import { useTheme } from '../context/ThemeContext';
 
 type Prices = Partial<Record<MaterialName, number>>;
@@ -35,27 +35,27 @@ const ComprehensiveCalculator = () => {
           throw new Error('서버에서 가격 정보를 가져오는 데 실패했습니다.');
         }
         const responseData = await response.json();
-        const apiData: Partial<Record<MaterialName, ItemPrice>> = responseData;
+        // Corrected type for apiData: it's a map of MaterialName to number, not ItemPrice object
+        const apiData: Partial<Record<MaterialName, number>> = responseData.prices || {};
         const newPrices: Prices = {};
-        let updatedTime: string | null = null;
+        // No need for updatedTime variable, use responseData.lastUpdated directly
 
+        // Populate newPrices from apiData
         for (const materialName in apiData) {
           if (apiData.hasOwnProperty(materialName)) {
-            const itemPrice = apiData[materialName as MaterialName];
-            if (itemPrice) {
-              newPrices[materialName as MaterialName] = itemPrice.CurrentMinPrice;
-              if (!updatedTime) { // Take the first UpdatedAt found
-                updatedTime = itemPrice.UpdatedAt;
-              }
+            const typedMaterialName = materialName as MaterialName; // Explicitly cast
+            if (apiData[typedMaterialName] !== undefined) {
+              newPrices[typedMaterialName] = apiData[typedMaterialName]!; // Directly assign the number price
             }
           }
         }
         setPrices(newPrices);
-        setLastUpdated(updatedTime);
+        setLastUpdated(responseData.lastUpdated); // Use responseData.lastUpdated directly
+
         const initialFusionPrices: Partial<Record<CraftableItem, number>> = {};
         RECIPES.forEach(recipe => {
-          if (newPrices[recipe.name as MaterialName]) {
-            initialFusionPrices[recipe.name] = newPrices[recipe.name as MaterialName];
+          if (newPrices[recipe.name as MaterialName] !== undefined) { // Check if price exists
+            initialFusionPrices[recipe.name] = newPrices[recipe.name as MaterialName]!;
           } else {
             initialFusionPrices[recipe.name] = 0;
           }
