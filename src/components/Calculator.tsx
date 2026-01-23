@@ -31,7 +31,9 @@ const Calculator: React.FC = () => {
           throw new Error('서버에서 가격 정보를 가져오는 데 실패했습니다.');
         }
         const responseData = await response.json();
+        console.log('API Raw Response Data:', responseData); // Log 1
         const apiData: Partial<Record<MaterialName, ItemPrice>> = responseData.prices || {}; // Adjusted to access .prices
+        console.log('API Parsed Data (apiData):', apiData); // Log 2
         
         const newMaterialPrices: Record<MaterialName, number> = {} as Record<MaterialName, number>;
         const newItemPrices: Record<CraftableItem, number> = {} as Record<CraftableItem, number>;
@@ -57,8 +59,11 @@ const Calculator: React.FC = () => {
           }
         });
         
+        console.log('New Material Prices:', newMaterialPrices); // Log 3
+        console.log('New Item Prices (Fusion Materials):', newItemPrices); // Log 4
         setMaterialPrices(newMaterialPrices);
         setItemPrices(newItemPrices);
+        console.log('Last Updated Time:', responseData.lastUpdated); // Log 5
         setLastUpdated(responseData.lastUpdated); // Adjusted to use responseData.lastUpdated
 
       } catch (err: any) {
