@@ -71,3 +71,21 @@ export interface ComprehensiveAnalysisResult {
 }
 
 export type Inventory = Record<MaterialName, number>;
+
+export interface ItemPrice {
+  Name: string;
+  BundleCount: number;
+  RecentPrice: number;
+  CurrentMinPrice: number;
+  LastSellPrice: number;
+  UpdatedAt: string;
+}
+
+export interface MarketData {
+  CategoryName: string;
+  TradeItems: ItemPrice[];
+}
+
+export interface LostArkMarketPrices {
+  [key: string]: ItemPrice;
+}

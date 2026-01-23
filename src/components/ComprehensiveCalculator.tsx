@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Card, Row, Col, Alert, Spinner } from 'react-bootstrap';
-import { MaterialName, CraftableItem, Inventory, ComprehensiveAnalysisResult } from '../types/data';
+import { MaterialName, CraftableItem, Inventory, ComprehensiveAnalysisResult, ItemPrice } from '../types/data';
 import { MATERIAL_NAMES, PURCHASABLE_MATERIALS, RECIPES } from '../logic/constants';
 import { analyzeComprehensiveProfit } from '../logic/comprehensiveCalculator';
 import { getItemGradeStyle, getImagePath, getImageBackgroundStyle } from '../logic/grades'; // Updated import
@@ -34,13 +34,28 @@ const ComprehensiveCalculator = () => {
         if (!response.ok) {
           throw new Error('서버에서 가격 정보를 가져오는 데 실패했습니다.');
         }
-        const data = await response.json();
-        setPrices(data.prices || {});
-        setLastUpdated(data.lastUpdated);
+        const responseData = await response.json();
+        const apiData: Partial<Record<MaterialName, ItemPrice>> = responseData;
+        const newPrices: Prices = {};
+        let updatedTime: string | null = null;
+
+        for (const materialName in apiData) {
+          if (apiData.hasOwnProperty(materialName)) {
+            const itemPrice = apiData[materialName as MaterialName];
+            if (itemPrice) {
+              newPrices[materialName as MaterialName] = itemPrice.CurrentMinPrice;
+              if (!updatedTime) { // Take the first UpdatedAt found
+                updatedTime = itemPrice.UpdatedAt;
+              }
+            }
+          }
+        }
+        setPrices(newPrices);
+        setLastUpdated(updatedTime);
         const initialFusionPrices: Partial<Record<CraftableItem, number>> = {};
         RECIPES.forEach(recipe => {
-          if (data.prices[recipe.name]) {
-            initialFusionPrices[recipe.name] = data.prices[recipe.name];
+          if (newPrices[recipe.name as MaterialName]) {
+            initialFusionPrices[recipe.name] = newPrices[recipe.name as MaterialName];
           } else {
             initialFusionPrices[recipe.name] = 0;
           }
