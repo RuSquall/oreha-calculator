@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Form, Card, Spinner, Alert } from 'react-bootstrap';
 import { PURCHASABLE_MATERIALS, RECIPES } from '../logic/constants';
-import { MaterialName, ProfitAnalysisResult, CraftableItem, ItemPrice } from '../types/data'; // Added ItemPrice
+import { MaterialName, ProfitAnalysisResult, CraftableItem } from '../types/data'; // ItemPrice removed
 import { analyzeCraftingProfit } from '../logic/calculator';
 import { getImagePath, getItemGradeStyle, getImageBackgroundStyle } from '../logic/grades';
 import { useTheme } from '../context/ThemeContext';
@@ -32,28 +32,27 @@ const Calculator: React.FC = () => {
         }
         const responseData = await response.json();
         console.log('API Raw Response Data:', responseData); // Log 1
-        const apiData: Partial<Record<MaterialName, ItemPrice>> = responseData.prices || {}; // Adjusted to access .prices
+        // Corrected type for apiData: it's a map of MaterialName to number, not ItemPrice object
+        const apiData: Partial<Record<MaterialName, number>> = responseData.prices || {}; 
         console.log('API Parsed Data (apiData):', apiData); // Log 2
         
         const newMaterialPrices: Record<MaterialName, number> = {} as Record<MaterialName, number>;
         const newItemPrices: Record<CraftableItem, number> = {} as Record<CraftableItem, number>;
-        // let updatedTime: string | null = null; // Removed updatedTime variable
 
         // Populate materialPrices
         PURCHASABLE_MATERIALS.forEach(name => {
-          const itemPrice = apiData[name]; // Assign to a temporary variable
-          if (itemPrice && itemPrice.CurrentMinPrice !== undefined) { // Now itemPrice is ItemPrice (not undefined)
-            newMaterialPrices[name] = itemPrice.CurrentMinPrice; // Access CurrentMinPrice safely
+          if (apiData[name] !== undefined) { // Check if price exists
+            newMaterialPrices[name] = apiData[name]!; // Directly assign the number price
           } else {
-            newMaterialPrices[name] = 0; // Default to 0 if not found or price is undefined
+            newMaterialPrices[name] = 0; // Default to 0 if not found
           }
         });
 
         // Populate itemPrices (fusion materials)
         RECIPES.forEach(recipe => {
-          const materialItemPrice = apiData[recipe.name as MaterialName]; // Assign to a temporary variable
-          if (materialItemPrice && materialItemPrice.CurrentMinPrice !== undefined) { // Now materialItemPrice is ItemPrice
-            newItemPrices[recipe.name] = materialItemPrice.CurrentMinPrice; // Access CurrentMinPrice safely
+          const materialName = recipe.name as MaterialName; // Cast to MaterialName for apiData access
+          if (apiData[materialName] !== undefined) { // Check if price exists
+            newItemPrices[recipe.name] = apiData[materialName]!; // Directly assign the number price
           } else {
             newItemPrices[recipe.name] = 0; // Default to 0
           }
