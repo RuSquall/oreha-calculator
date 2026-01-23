@@ -31,17 +31,17 @@ const Calculator: React.FC = () => {
           throw new Error('서버에서 가격 정보를 가져오는 데 실패했습니다.');
         }
         const responseData = await response.json();
-        const apiData: Partial<Record<MaterialName, ItemPrice>> = responseData; // Assuming responseData is directly the ItemPrice map
+        const apiData: Partial<Record<MaterialName, ItemPrice>> = responseData.prices || {}; // Adjusted to access .prices
         
         const newMaterialPrices: Record<MaterialName, number> = {} as Record<MaterialName, number>;
         const newItemPrices: Record<CraftableItem, number> = {} as Record<CraftableItem, number>;
-        let updatedTime: string | null = null;
+        // let updatedTime: string | null = null; // Removed updatedTime variable
 
         // Populate materialPrices
         PURCHASABLE_MATERIALS.forEach(name => {
           if (apiData[name] && apiData[name]?.CurrentMinPrice !== undefined) {
             newMaterialPrices[name] = apiData[name]!.CurrentMinPrice;
-            if (!updatedTime) updatedTime = apiData[name]!.UpdatedAt;
+            // if (!updatedTime) updatedTime = apiData[name]!.UpdatedAt; // Removed updatedTime logic
           } else {
             newMaterialPrices[name] = 0; // Default to 0 if not found or price is undefined
           }
@@ -51,7 +51,7 @@ const Calculator: React.FC = () => {
         RECIPES.forEach(recipe => {
           if (apiData[recipe.name as MaterialName] && apiData[recipe.name as MaterialName]?.CurrentMinPrice !== undefined) {
             newItemPrices[recipe.name] = apiData[recipe.name as MaterialName]!.CurrentMinPrice;
-            if (!updatedTime) updatedTime = apiData[recipe.name as MaterialName]!.UpdatedAt;
+            // if (!updatedTime) updatedTime = apiData[recipe.name as MaterialName]!.UpdatedAt; // Removed updatedTime logic
           } else {
             newItemPrices[recipe.name] = 0; // Default to 0
           }
@@ -59,7 +59,7 @@ const Calculator: React.FC = () => {
         
         setMaterialPrices(newMaterialPrices);
         setItemPrices(newItemPrices);
-        setLastUpdated(updatedTime);
+        setLastUpdated(responseData.lastUpdated); // Adjusted to use responseData.lastUpdated
 
       } catch (err: any) {
         setError(err.message);
