@@ -41,18 +41,18 @@ const Calculator: React.FC = () => {
 
         // Populate materialPrices
         PURCHASABLE_MATERIALS.forEach(name => {
-          if (apiData[name] && apiData[name]?.CurrentMinPrice !== undefined) {
-            newMaterialPrices[name] = apiData[name]!.CurrentMinPrice;
+          if (apiData[name]) { // Check if price exists
+            newMaterialPrices[name] = apiData[name]; // Directly assign the price
             // if (!updatedTime) updatedTime = apiData[name]!.UpdatedAt; // Removed updatedTime logic
           } else {
-            newMaterialPrices[name] = 0; // Default to 0 if not found or price is undefined
+            newMaterialPrices[name] = 0; // Default to 0 if not found
           }
         });
 
         // Populate itemPrices (fusion materials)
         RECIPES.forEach(recipe => {
-          if (apiData[recipe.name as MaterialName] && apiData[recipe.name as MaterialName]?.CurrentMinPrice !== undefined) {
-            newItemPrices[recipe.name] = apiData[recipe.name as MaterialName]!.CurrentMinPrice;
+          if (apiData[recipe.name as MaterialName]) { // Check if price exists
+            newItemPrices[recipe.name] = apiData[recipe.name as MaterialName]; // Directly assign the price
             // if (!updatedTime) updatedTime = apiData[recipe.name as MaterialName]!.UpdatedAt; // Removed updatedTime logic
           } else {
             newItemPrices[recipe.name] = 0; // Default to 0
