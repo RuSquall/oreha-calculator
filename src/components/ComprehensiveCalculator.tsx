@@ -259,7 +259,7 @@ const ComprehensiveCalculator = () => {
               ) : (
                 <>
                   {/* Removed redundant recipeName heading */}
-                  <p className="mb-2">
+                  <p className="mb-2" style={{ color: 'var(--text-color)' }}>
                     <strong>최적 추천:</strong> <strong className="text-primary">{result.recommendation}</strong>
                   </p>
                   <p className="mb-2" style={{ color: 'var(--text-color)' }}>
@@ -277,7 +277,7 @@ const ComprehensiveCalculator = () => {
                   </p>
                   {result.craftSellExchangeSteps.length > 0 && (
                     <div className="mt-2">
-                      <h6 className="text-muted small">제작/판매 시 필요 교환:</h6>
+                      <h6 className="small" style={{ color: 'var(--text-color)' }}>제작/판매 시 필요 교환:</h6>
                       <ul className="small text-muted">
                         {result.craftSellExchangeSteps.map((step, stepIndex) => (
                           <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
