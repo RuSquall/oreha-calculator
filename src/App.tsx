@@ -14,7 +14,7 @@ function App() {
       <Row className="justify-content-md-center">
         <Col md={12}>
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1 className="mb-0 h2">로스트아크 융화재료 계산기</h1>
+            <h1 className="mb-0 h2" style={{ color: 'var(--text-color)' }}>로스트아크 융화재료 계산기</h1>
             <Button variant={theme === 'dark' ? 'outline-light' : 'outline-dark'} onClick={toggleTheme} size="sm">
               {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
             </Button>
@@ -23,7 +23,6 @@ function App() {
           {/* 비용 최적화 계산기 - 상단 고정 */}
           <div className="mb-4">
             <hr/>
-            <h4 className="mb-3 text-center">비용 최적화 계산기</h4>
             <Calculator />
             <hr className="mt-4"/>
           </div>

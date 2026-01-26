@@ -102,7 +102,7 @@ const Calculator: React.FC = () => {
       <Row className="align-items-center justify-content-center text-center mb-3">
         <Col md={3}>
           <Form.Group>
-            <Form.Label>
+            <Form.Label style={{ color: 'var(--text-color)' }}>
               제작 수수료 감소율 (%)
               <span className="ms-2">
                 {isLoading ? (
