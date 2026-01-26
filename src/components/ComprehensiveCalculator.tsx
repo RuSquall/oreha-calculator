@@ -2,7 +2,7 @@ import { MaterialName, CraftableItem, Inventory, ComprehensiveAnalysisResult } f
 import { MATERIAL_NAMES, PURCHASABLE_MATERIALS, RECIPES } from '../logic/constants';
 import { analyzeComprehensiveProfit } from '../logic/comprehensiveCalculator';
 import { getItemGradeStyle, getImagePath, getImageBackgroundStyle } from '../logic/grades'; // Updated import
-import { Row, Col, Form, Card, Spinner, Alert, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Row, Col, Form, Card, Spinner, Alert, Button, OverlayTrigger, Tooltip, Accordion } from 'react-bootstrap';
 import React, { useState, useEffect} from 'react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -113,192 +113,209 @@ const ComprehensiveCalculator = () => {
   };
 
   return (
-    <Card>
-      <Card.Body>
-        <Form onSubmit={handleSubmit}>
-          <h5 className="card-title text-center mb-4">1. 보유 재료 입력</h5>
-          <Row>
-            {MATERIAL_NAMES.map((name) => {
-              const gradeStyle = getItemGradeStyle(name, theme);
-              return (
-                <Col md={6} key={`inv-${name}`}>
-                    <Form.Group className="mb-3" controlId={`inventory-${name}`}>
-                      <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
-                        <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(name, theme) }} />
-                        <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{name}</span>
-                      </Form.Label>
-                      <Form.Control
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={inventory[name] === 0 ? '' : inventory[name]}
-                      onChange={(e) => handleInventoryChange(name, e.target.value)}
-                      placeholder="보유 수량"
-                    />
-                  </Form.Group>
-                </Col>
-              );
-            })}
-          </Row>
+    <Row> {/* Main Row for two-column layout */}
+      <Col md={5}> {/* Left column for input form */}
+        <Card>
+          <Card.Body>
+            <Form onSubmit={handleSubmit}>
+              <h5 className="card-title text-center mb-4">1. 보유 재료 입력</h5>
+              <Row>
+                {MATERIAL_NAMES.map((name) => {
+                  const gradeStyle = getItemGradeStyle(name, theme);
+                  return (
+                    <Col xs={6} sm={6} md={4} lg={3} key={`inv-${name}`}>
+                        <Form.Group className="mb-3" controlId={`inventory-${name}`}>
+                          <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
+                            <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(name, theme) }} />
+                            <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{name}</span>
+                          </Form.Label>
+                          <Form.Control
+                          type="number"
+                          min="0"
+                          step="1"
+                          value={inventory[name] === 0 ? '' : inventory[name]}
+                          onChange={(e) => handleInventoryChange(name, e.target.value)}
+                          placeholder="보유 수량"
+                        />
+                      </Form.Group>
+                    </Col>
+                  );
+                })}
+              </Row>
 
-          <hr className="my-4" />
+              <hr className="my-4" />
 
-          <div className="text-center mb-4">
-            <h5 className="card-title d-inline-block me-2 mb-0">
-              2. 재료 시세 입력 (100개당)
-              <span className="ms-2">
-                {isLoading ? (
-                  <Spinner animation="border" size="sm" />
-                ) : (
-                  lastUpdated && (
-                    <OverlayTrigger
-                      placement="top"
-                      overlay={
-                        <Tooltip id="update-time-tooltip-comprehensive">
-                          마지막 시세 업데이트: {new Date(lastUpdated).toLocaleString()}
-                        </Tooltip>
-                      }
-                    >
-                      <span style={{ cursor: 'help' }}>⏰</span>
-                    </OverlayTrigger>
-                  )
-                )}
-              </span>
-            </h5>
-          </div>
+              <div className="text-center mb-4">
+                <h5 className="card-title d-inline-block me-2 mb-0">
+                  2. 재료 시세 입력 (100개당)
+                  <span className="ms-2">
+                    {isLoading ? (
+                      <Spinner animation="border" size="sm" />
+                    ) : (
+                      lastUpdated && (
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={
+                            <Tooltip id="update-time-tooltip-comprehensive">
+                              마지막 시세 업데이트: {new Date(lastUpdated).toLocaleString()}
+                            </Tooltip>
+                          }
+                        >
+                          <span style={{ cursor: 'help' }}>⏰</span>
+                        </OverlayTrigger>
+                      )
+                    )}
+                  </span>
+                </h5>
+              </div>
 
-          {error && <Alert variant="danger">오류: {error}</Alert>}
-          
-          <Row>
-              {PURCHASABLE_MATERIALS.map((name) => {
-                const gradeStyle = getItemGradeStyle(name, theme);
-                return (
-                  <Col md={6} key={`price-${name}`}>
-                    <Form.Group className="mb-3" controlId={`price-${name}`}>
-                      <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
-                        <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(name, theme) }} />
-                        <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{name}</span>
-                      </Form.Label>
-                      <Form.Control
-                      type="number"
-                      min="0"
-                      step="any"
-                      value={prices[name] || ''}
-                      onChange={(e) => handlePriceChange(name, e.target.value)}
-                      placeholder={isLoading ? "불러오는 중..." : "골드"}
-                      disabled={isLoading}
-                    />
-                  </Form.Group>
-                </Col>
-              );
-            })}
-          </Row>
+              {error && <Alert variant="danger">오류: {error}</Alert>}
+              
+              <Row>
+                  {PURCHASABLE_MATERIALS.map((name) => {
+                    const gradeStyle = getItemGradeStyle(name, theme);
+                    return (
+                      <Col xs={6} sm={6} md={4} lg={3} key={`price-${name}`}>
+                        <Form.Group className="mb-3" controlId={`price-${name}`}>
+                          <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
+                            <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(name, theme) }} />
+                            <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{name}</span>
+                          </Form.Label>
+                          <Form.Control
+                          type="number"
+                          min="0"
+                          step="any"
+                          value={prices[name] || ''}
+                          onChange={(e) => handlePriceChange(name, e.target.value)}
+                          placeholder={isLoading ? "불러오는 중..." : "골드"}
+                          disabled={isLoading}
+                        />
+                      </Form.Group>
+                    </Col>
+                  );
+                })}
+              </Row>
 
-          <hr className="my-4" />
+              <hr className="my-4" />
 
-          <h5 className="card-title text-center mb-4">3. 추가 정보 입력</h5>
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3" controlId="craftFeeReduction">
-                <Form.Label>제작 수수료 감소율 (%)</Form.Label>
-                <Form.Control
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="any"
-                  value={craftFeeReduction === 0 ? '' : craftFeeReduction}
-                  onChange={(e) => setCraftFeeReduction(parseFloat(e.target.value) || 0)}
-                  placeholder="예: 15"
-                />
-              </Form.Group>
-            </Col>
-            {RECIPES.map(recipe => {
-              const gradeStyle = getItemGradeStyle(recipe.name, theme);
-              return (
-                <Col md={6} key={`fusionPrice-${recipe.name}`}>
-                  <Form.Group className="mb-3" controlId={`fusionPrice-${recipe.name}`}>
-                    <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
-                        <img src={getImagePath(recipe.name)} alt={recipe.name} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(recipe.name, theme) }} />
-                      <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{recipe.name} 시장 가격 (1개당)</span>
-                    </Form.Label>
+              <h5 className="card-title text-center mb-4">3. 추가 정보 입력</h5>
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3" controlId="craftFeeReduction">
+                    <Form.Label>제작 수수료 감소율 (%)</Form.Label>
                     <Form.Control
                       type="number"
                       min="0"
+                      max="100"
                       step="any"
-                      value={fusionMaterialPrices[recipe.name] || ''}
-                      onChange={(e) => handleFusionPriceChange(recipe.name, e.target.value)}
-                      placeholder="골드"
+                      value={craftFeeReduction === 0 ? '' : craftFeeReduction}
+                      onChange={(e) => setCraftFeeReduction(parseFloat(e.target.value) || 0)}
+                      placeholder="예: 15"
                     />
                   </Form.Group>
                 </Col>
+                {RECIPES.map(recipe => {
+                  const gradeStyle = getItemGradeStyle(recipe.name, theme);
+                  return (
+                    <Col md={6} key={`fusionPrice-${recipe.name}`}>
+                      <Form.Group className="mb-3" controlId={`fusionPrice-${recipe.name}`}>
+                        <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
+                            <img src={getImagePath(recipe.name)} alt={recipe.name} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(recipe.name, theme) }} />
+                          <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{recipe.name} 시장 가격 (1개당)</span>
+                        </Form.Label>
+                        <Form.Control
+                          type="number"
+                          min="0"
+                          step="any"
+                          value={fusionMaterialPrices[recipe.name] || ''}
+                          onChange={(e) => handleFusionPriceChange(recipe.name, e.target.value)}
+                          placeholder="골드"
+                        />
+                      </Form.Group>
+                    </Col>
+                  );
+                })}
+              </Row>
+
+              <div className="d-grid mt-4">
+                <Button variant="primary" size="lg" type="submit">
+                  종합 분석
+                </Button>
+              </div>
+            </Form>
+          </Card.Body>
+        </Card>
+      </Col>
+
+      <Col md={7}> {/* Right column for results */}
+        {results && (
+          <Accordion defaultActiveKey="0" className="mt-4">
+            {results.map((result, index) => {
+              const recipeName = RECIPES[index].name;
+              const titleGradeStyle = getItemGradeStyle(recipeName, theme);
+              return (
+                <Accordion.Item eventKey={String(index)} key={index}>
+                  <Accordion.Header>
+                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                      <img src={getImagePath(recipeName)} alt={recipeName} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(recipeName, theme) }} />
+                      <span style={{ marginLeft: '8px', color: titleGradeStyle.color, fontWeight: 'bold' }}>
+                        {result.message === '선택된 제작 아이템을 찾을 수 없습니다.' ? '종합 분석 결과' : `${recipeName} 종합 분석 결과`}
+                      </span>
+                      {result.recommendation !== '오류' && (
+                        <span className={`ms-auto badge ${result.recommendation.includes('판매') ? 'bg-warning' : result.recommendation.includes('사용') ? 'bg-info' : 'bg-secondary'}`}>
+                          {result.recommendation}
+                        </span>
+                      )}
+                    </div>
+                  </Accordion.Header>
+                  <Accordion.Body style={{ backgroundColor: 'var(--component-bg)', borderColor: 'var(--border-color)' }}>
+                    {result.recommendation === '오류' ? (
+                      <p>{result.message}</p>
+                    ) : (
+                      <>
+                        <p className="mb-2" style={{ color: 'var(--text-color)' }}>
+                          <strong>최적 추천:</strong> <strong className="text-primary">{result.recommendation}</strong>
+                        </p>
+                        <p className="mb-2" style={{ color: 'var(--text-color)' }}>
+                          모든 재료 직접 판매 시 총 가치: <strong className="text-warning">{result.totalValueSellAll.toLocaleString()} 골드</strong>
+                        </p>
+                        <p className="mb-2" style={{ color: 'var(--text-color)' }}>
+                          최대 제작 후 판매 시 총 가치: <strong className="text-success">{result.totalValueCraftSell.toLocaleString()} 골드</strong>
+                        </p>
+                        <p className="mb-2" style={{ color: 'var(--text-color)' }}>
+                          최대 제작 후 직접 사용 시 총 가치: <strong className="text-info">{result.totalValueCraftUse.toLocaleString()} 골드</strong>
+                        </p>
+                        <hr />
+                        <p className="mb-0 small" style={{ color: 'var(--text-color)' }}>
+                          * 최대 제작 가능 융화재료: {result.maxCraftsPossible / 10}회 ({result.maxCraftsPossible}개)
+                        </p>
+                        {result.craftSellExchangeSteps.length > 0 && (
+                          <div className="mt-2">
+                            <h6 className="small" style={{ color: 'var(--text-color)' }}>제작/판매 시 필요 교환:</h6>
+                            <ul className="small text-muted">
+                              {result.craftSellExchangeSteps.map((step, stepIndex) => (
+                                <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                                  <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.fromMaterial, theme) }} />
+                                  <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.fromMaterial, theme).color }}>{step.fromMaterial} x{step.fromAmount}</span>
+                                  <span style={{ margin: '0 5px' }}> → </span>
+                                  <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.toMaterial, theme) }} />
+                                  <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.toMaterial, theme).color }}>{step.toMaterial} x{step.toAmount}</span>
+                                  <span style={{ marginLeft: '5px', color: 'var(--text-color)' }}> (x{step.count}회)</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </Accordion.Body>
+                </Accordion.Item>
               );
             })}
-          </Row>
-
-          <div className="d-grid mt-4">
-            <Button variant="primary" size="lg" type="submit">
-              종합 분석
-            </Button>
-          </div>
-        </Form>
-
-        {results && results.map((result, index) => {
-          const recipeName = RECIPES[index].name;
-          const titleGradeStyle = getItemGradeStyle(recipeName, theme);
-          return (
-            <Alert
-              key={index}
-              variant={result.recommendation === '오류' ? 'danger' : 'success'}
-              className="mt-4"
-              style={{ backgroundColor: 'var(--component-bg)', borderColor: 'var(--border-color)' }}
-            >
-              <Alert.Heading style={{ color: titleGradeStyle.color }}>{result.message === '선택된 제작 아이템을 찾을 수 없습니다.' ? '종합 분석 결과' : `${recipeName} 종합 분석 결과`}</Alert.Heading>
-              <hr />
-              {result.recommendation === '오류' ? (
-                <p>{result.message}</p>
-              ) : (
-                <>
-                  {/* Removed redundant recipeName heading */}
-                  <p className="mb-2" style={{ color: 'var(--text-color)' }}>
-                    <strong>최적 추천:</strong> <strong className="text-primary">{result.recommendation}</strong>
-                  </p>
-                  <p className="mb-2" style={{ color: 'var(--text-color)' }}>
-                    모든 재료 직접 판매 시 총 가치: <strong className="text-warning">{result.totalValueSellAll.toLocaleString()} 골드</strong>
-                  </p>
-                  <p className="mb-2" style={{ color: 'var(--text-color)' }}>
-                    최대 제작 후 판매 시 총 가치: <strong className="text-success">{result.totalValueCraftSell.toLocaleString()} 골드</strong>
-                  </p>
-                  <p className="mb-2" style={{ color: 'var(--text-color)' }}>
-                    최대 제작 후 직접 사용 시 총 가치: <strong className="text-info">{result.totalValueCraftUse.toLocaleString()} 골드</strong>
-                  </p>
-                  <hr />
-                  <p className="mb-0 small" style={{ color: 'var(--text-color)' }}>
-                    * 최대 제작 가능 융화재료: {result.maxCraftsPossible / 10}회 ({result.maxCraftsPossible}개)
-                  </p>
-                  {result.craftSellExchangeSteps.length > 0 && (
-                    <div className="mt-2">
-                      <h6 className="small" style={{ color: 'var(--text-color)' }}>제작/판매 시 필요 교환:</h6>
-                      <ul className="small text-muted">
-                        {result.craftSellExchangeSteps.map((step, stepIndex) => (
-                          <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                            <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.fromMaterial, theme) }} />
-                            <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.fromMaterial, theme).color }}>{step.fromMaterial} x{step.fromAmount}</span>
-                            <span style={{ margin: '0 5px' }}> → </span>
-                            <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.toMaterial, theme) }} />
-                            <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.toMaterial, theme).color }}>{step.toMaterial} x{step.toAmount}</span>
-                            <span style={{ marginLeft: '5px', color: 'var(--text-color)' }}> (x{step.count}회)</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </>
-              )}
-            </Alert>
-          );
-        })}
-      </Card.Body>
-    </Card>
+          </Accordion>
+        )}
+      </Col>
+    </Row>
   );
 };
 

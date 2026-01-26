@@ -160,7 +160,7 @@ const Calculator: React.FC = () => {
       {/* Row 2: Price Inputs */}
       <Row className="g-2">
         {[...RECIPES.map(r => r.name), ...PURCHASABLE_MATERIALS].map(name => (
-          <Col lg key={name}>
+          <Col xs={6} sm={6} md={4} lg key={name}>
             <Form.Group>
               <Form.Label style={getItemGradeStyle(name, theme)} className="small w-100">
                 <img src={getImagePath(name as MaterialName)} alt={name} width="16" height="16" className="me-1" style={getImageBackgroundStyle(name as MaterialName, theme)} />
