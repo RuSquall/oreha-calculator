@@ -3,7 +3,7 @@ import { MATERIAL_NAMES, PURCHASABLE_MATERIALS, RECIPES } from '../logic/constan
 import { analyzeComprehensiveProfit } from '../logic/comprehensiveCalculator';
 import { getItemGradeStyle, getImagePath, getImageBackgroundStyle } from '../logic/grades'; // Updated import
 import { Row, Col, Form, Card, Spinner, Alert, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 
 type Prices = Partial<Record<MaterialName, number>>;
@@ -93,8 +93,7 @@ const ComprehensiveCalculator = () => {
     });
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const runAnalysis = useCallback(() => {
     const fullPrices = PURCHASABLE_MATERIALS.reduce((acc, name) => {
         acc[name] = prices[name] || 0;
         return acc;
@@ -110,14 +109,18 @@ const ComprehensiveCalculator = () => {
       );
     });
     setResults(allResults);
-  };
+  }, [inventory, prices, craftFeeReduction, fusionMaterialPrices]); // Dependencies for useCallback
+
+  useEffect(() => {
+    runAnalysis();
+  }, [runAnalysis]); // Call runAnalysis whenever its dependencies change
 
   return (
     <Row> {/* Main Row for two-column layout */}
       <Col md={8}> {/* Left column for input form */}
         <Card>
           <Card.Body>
-            <Form onSubmit={handleSubmit}>
+            <Form> {/* Removed onSubmit={handleSubmit} */}
               <h5 className="card-title text-center mb-4">1. 보유 재료 입력</h5>
               <Row>
                 {MATERIAL_NAMES.map((name) => {
@@ -237,11 +240,7 @@ const ComprehensiveCalculator = () => {
                 })}
               </Row>
 
-              <div className="d-grid mt-4">
-                <Button variant="primary" size="lg" type="submit">
-                  종합 분석
-                </Button>
-              </div>
+              {/* Removed "종합 분석" button */}
             </Form>
           </Card.Body>
         </Card>
