@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Row, Col, Form, Spinner, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Form, Spinner, Alert, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { PURCHASABLE_MATERIALS, RECIPES } from '../logic/constants';
 import { MaterialName, ProfitAnalysisResult, CraftableItem } from '../types/data';
 import { analyzeCraftingProfit } from '../logic/calculator';
@@ -91,13 +91,32 @@ const Calculator: React.FC = () => {
     runAnalysis();
   }, [runAnalysis]);
 
+  const formatProfit = (profit: number) => {
+    const sign = profit > 0 ? '+' : '';
+    return `${sign}${profit.toLocaleString()}`;
+  };
+
   return (
     <Container fluid>
       {/* Row 1: Core Input & Results */}
       <Row className="align-items-center justify-content-center text-center mb-3">
         <Col md={3}>
           <Form.Group>
-            <Form.Label>제작 수수료 감소율 (%)</Form.Label>
+            <Form.Label>
+              제작 수수료 감소율 (%)
+              {lastUpdated && (
+                <OverlayTrigger
+                  placement="top"
+                  overlay={
+                    <Tooltip id="update-time-tooltip">
+                      마지막 시세 업데이트: {new Date(lastUpdated).toLocaleString()}
+                    </Tooltip>
+                  }
+                >
+                  <span className="ms-2" style={{ cursor: 'help' }}>⏰</span>
+                </OverlayTrigger>
+              )}
+            </Form.Label>
             <Form.Control type="number" value={craftFeeDiscount} onChange={e => handleDiscountChange(e.target.value)} placeholder="예: 15" />
           </Form.Group>
         </Col>
@@ -113,8 +132,8 @@ const Calculator: React.FC = () => {
                 </h6>
                 {result ? (
                   <>
-                    <p className="mb-1 small">판매 이득: <strong className={result.profitFromCraftAndSell >= 0 ? 'text-success' : 'text-danger'}>{result.profitFromCraftAndSell.toLocaleString()} G</strong></p>
-                    <p className="mb-0 small">사용 이득: <strong className={result.profitFromCraftAndUse >= 0 ? 'text-success' : 'text-danger'}>{result.profitFromCraftAndUse.toLocaleString()} G</strong></p>
+                    <p className="mb-1 small">판매 이득: <strong className={result.profitFromCraftAndSell >= 0 ? 'text-success' : 'text-danger'}>{formatProfit(result.profitFromCraftAndSell)} G</strong></p>
+                    <p className="mb-0 small">사용 이득: <strong className={result.profitFromCraftAndUse >= 0 ? 'text-success' : 'text-danger'}>{formatProfit(result.profitFromCraftAndUse)} G</strong></p>
                   </>
                 ) : (
                   <Spinner animation="border" size="sm" />
@@ -130,11 +149,6 @@ const Calculator: React.FC = () => {
           <Col md={8}>
             {isLoading && <div className="text-center"><Spinner animation="border" size="sm" /> <span className="ms-2">시세 불러오는 중...</span></div>}
             {error && <Alert variant="danger" className="py-1 text-center">오류: {error}</Alert>}
-            {lastUpdated && !isLoading && !error && (
-              <Alert variant="info" className="py-1 text-center">
-                마지막 시세 업데이트: {new Date(lastUpdated).toLocaleString()}
-              </Alert>
-            )}
           </Col>
       </Row>
 
