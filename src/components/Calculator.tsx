@@ -104,18 +104,24 @@ const Calculator: React.FC = () => {
           <Form.Group>
             <Form.Label>
               제작 수수료 감소율 (%)
-              {lastUpdated && (
-                <OverlayTrigger
-                  placement="top"
-                  overlay={
-                    <Tooltip id="update-time-tooltip">
-                      마지막 시세 업데이트: {new Date(lastUpdated).toLocaleString()}
-                    </Tooltip>
-                  }
-                >
-                  <span className="ms-2" style={{ cursor: 'help' }}>⏰</span>
-                </OverlayTrigger>
-              )}
+              <span className="ms-2">
+                {isLoading ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  lastUpdated && (
+                    <OverlayTrigger
+                      placement="top"
+                      overlay={
+                        <Tooltip id="update-time-tooltip">
+                          마지막 시세 업데이트: {new Date(lastUpdated).toLocaleString()}
+                        </Tooltip>
+                      }
+                    >
+                      <span style={{ cursor: 'help' }}>⏰</span>
+                    </OverlayTrigger>
+                  )
+                )}
+              </span>
             </Form.Label>
             <Form.Control type="number" value={craftFeeDiscount} onChange={e => handleDiscountChange(e.target.value)} placeholder="예: 15" />
           </Form.Group>
@@ -144,10 +150,9 @@ const Calculator: React.FC = () => {
         })}
       </Row>
 
-      {/* API Status */}
+      {/* API Status (Error only) */}
       <Row className="justify-content-center my-2">
           <Col md={8}>
-            {isLoading && <div className="text-center"><Spinner animation="border" size="sm" /> <span className="ms-2">시세 불러오는 중...</span></div>}
             {error && <Alert variant="danger" className="py-1 text-center">오류: {error}</Alert>}
           </Col>
       </Row>
