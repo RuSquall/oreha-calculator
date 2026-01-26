@@ -19,16 +19,10 @@ function App() {
               {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
             </Button>
           </div>
-
-          {/* 비용 최적화 계산기 - 상단 고정 */}
-          <div className="mb-4">
-            <hr/>
-            <h4 className="mb-3 text-center">비용 최적화 계산기</h4>
-            <Calculator />
-            <hr className="mt-4"/>
-          </div>
-
-          <Tabs defaultActiveKey="comprehensive-analyzer" id="main-tabs" className="mb-3" fill>
+          <Tabs defaultActiveKey="cost-optimizer" id="main-tabs" className="mb-3" fill>
+            <Tab eventKey="cost-optimizer" title="비용 최적화 계산기">
+              <Calculator />
+            </Tab>
             <Tab eventKey="comprehensive-analyzer" title="종합 분석 계산기">
               <ComprehensiveCalculator />
             </Tab>
