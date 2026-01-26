@@ -258,21 +258,21 @@ const ComprehensiveCalculator = () => {
                 <p>{result.message}</p>
               ) : (
                 <>
-                  <h5 className="mb-3" style={{ color: titleGradeStyle.color }}>**{recipeName}**</h5>
+                  {/* Removed redundant recipeName heading */}
                   <p className="mb-2">
-                    **최적 추천:** <strong className="text-primary">{result.recommendation}</strong>
+                    <strong>최적 추천:</strong> <strong className="text-primary">{result.recommendation}</strong>
                   </p>
-                  <p className="mb-2">
+                  <p className="mb-2" style={{ color: 'var(--text-color)' }}>
                     모든 재료 직접 판매 시 총 가치: <strong className="text-warning">{result.totalValueSellAll.toLocaleString()} 골드</strong>
                   </p>
-                  <p className="mb-2">
+                  <p className="mb-2" style={{ color: 'var(--text-color)' }}>
                     최대 제작 후 판매 시 총 가치: <strong className="text-success">{result.totalValueCraftSell.toLocaleString()} 골드</strong>
                   </p>
-                  <p className="mb-2">
+                  <p className="mb-2" style={{ color: 'var(--text-color)' }}>
                     최대 제작 후 직접 사용 시 총 가치: <strong className="text-info">{result.totalValueCraftUse.toLocaleString()} 골드</strong>
                   </p>
                   <hr />
-                  <p className="mb-0 text-muted small">
+                  <p className="mb-0 small" style={{ color: 'var(--text-color)' }}>
                     * 최대 제작 가능 융화재료: {result.maxCraftsPossible / 10}회 ({result.maxCraftsPossible}개)
                   </p>
                   {result.craftSellExchangeSteps.length > 0 && (
@@ -286,7 +286,7 @@ const ComprehensiveCalculator = () => {
                             <span style={{ margin: '0 5px' }}> → </span>
                             <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.toMaterial, theme) }} />
                             <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.toMaterial, theme).color }}>{step.toMaterial} x{step.toAmount}</span>
-                            <span style={{ marginLeft: '5px' }}> (x{step.count}회)</span>
+                            <span style={{ marginLeft: '5px', color: 'var(--text-color)' }}> (x{step.count}회)</span>
                           </li>
                         ))}
                       </ul>
