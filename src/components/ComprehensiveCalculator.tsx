@@ -2,7 +2,7 @@ import { MaterialName, CraftableItem, Inventory, ComprehensiveAnalysisResult } f
 import { MATERIAL_NAMES, PURCHASABLE_MATERIALS, RECIPES } from '../logic/constants';
 import { analyzeComprehensiveProfit } from '../logic/comprehensiveCalculator';
 import { getItemGradeStyle, getImagePath, getImageBackgroundStyle } from '../logic/grades'; // Updated import
-import { Row, Col, Form, Card, Spinner, Alert, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Row, Col, Form, Card, Spinner, Alert, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -240,8 +240,7 @@ const ComprehensiveCalculator = () => {
                 })}
               </Row>
 
-              {/* Removed "종합 분석" button */}
-            </Form>
+              </Form>
           </Card.Body>
         </Card>
       </Col>
