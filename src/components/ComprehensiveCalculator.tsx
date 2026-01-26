@@ -2,7 +2,7 @@ import { MaterialName, CraftableItem, Inventory, ComprehensiveAnalysisResult } f
 import { MATERIAL_NAMES, PURCHASABLE_MATERIALS, RECIPES } from '../logic/constants';
 import { analyzeComprehensiveProfit } from '../logic/comprehensiveCalculator';
 import { getItemGradeStyle, getImagePath, getImageBackgroundStyle } from '../logic/grades'; // Updated import
-import { Row, Col, Form, Card, Spinner, Alert, Button } from 'react-bootstrap';
+import { Row, Col, Form, Card, Spinner, Alert, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import React, { useState, useEffect} from 'react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -144,17 +144,30 @@ const ComprehensiveCalculator = () => {
           <hr className="my-4" />
 
           <div className="text-center mb-4">
-            <h5 className="card-title d-inline-block me-2 mb-0">2. 재료 시세 입력 (100개당)</h5>
-            {isLoading && <Spinner animation="border" size="sm" />}
+            <h5 className="card-title d-inline-block me-2 mb-0">
+              2. 재료 시세 입력 (100개당)
+              <span className="ms-2">
+                {isLoading ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  lastUpdated && (
+                    <OverlayTrigger
+                      placement="top"
+                      overlay={
+                        <Tooltip id="update-time-tooltip-comprehensive">
+                          마지막 시세 업데이트: {new Date(lastUpdated).toLocaleString()}
+                        </Tooltip>
+                      }
+                    >
+                      <span style={{ cursor: 'help' }}>⏰</span>
+                    </OverlayTrigger>
+                  )
+                )}
+              </span>
+            </h5>
           </div>
 
           {error && <Alert variant="danger">오류: {error}</Alert>}
-          
-          {lastUpdated && !isLoading && !error && (
-            <Alert variant="info" className="text-center py-2">
-              마지막 업데이트: {new Date(lastUpdated).toLocaleString()}
-            </Alert>
-          )}
           
           <Row>
               {PURCHASABLE_MATERIALS.map((name) => {
@@ -233,7 +246,12 @@ const ComprehensiveCalculator = () => {
           const recipeName = RECIPES[index].name;
           const titleGradeStyle = getItemGradeStyle(recipeName, theme);
           return (
-            <Alert key={index} variant={result.recommendation === '오류' ? 'danger' : 'success'} className="mt-4">
+            <Alert
+              key={index}
+              variant={result.recommendation === '오류' ? 'danger' : 'success'}
+              className="mt-4"
+              style={{ backgroundColor: 'var(--component-bg)', borderColor: 'var(--border-color)' }}
+            >
               <Alert.Heading style={{ color: titleGradeStyle.color }}>{result.message === '선택된 제작 아이템을 찾을 수 없습니다.' ? '종합 분석 결과' : `${recipeName} 종합 분석 결과`}</Alert.Heading>
               <hr />
               {result.recommendation === '오류' ? (
