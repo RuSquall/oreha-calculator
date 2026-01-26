@@ -170,9 +170,11 @@ const Calculator: React.FC = () => {
                 type="number"
                 size="sm"
                 value={
-                  (itemPrices as Record<string, number>)[name] !== undefined 
-                  ? (itemPrices as Record<string, number>)[name]
-                  : (materialPrices as Record<string, number>)[name] || ''
+                  isLoading // 로딩 중일 때
+                  ? '' // 값을 빈 문자열로 설정하여 플레이스홀더가 보이도록 함
+                  : (itemPrices as Record<string, number>)[name] !== undefined 
+                    ? (itemPrices as Record<string, number>)[name]
+                    : (materialPrices as Record<string, number>)[name] || ''
                 }
                 onChange={e => {
                   if ((itemPrices as Record<string, number>)[name] !== undefined) {
