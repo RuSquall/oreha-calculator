@@ -2,7 +2,7 @@ import { MaterialName, CraftableItem, Inventory, ComprehensiveAnalysisResult } f
 import { MATERIAL_NAMES, PURCHASABLE_MATERIALS, RECIPES } from '../logic/constants';
 import { analyzeComprehensiveProfit } from '../logic/comprehensiveCalculator';
 import { getItemGradeStyle, getImagePath, getImageBackgroundStyle } from '../logic/grades'; // Updated import
-import { Row, Col, Form, Card, Spinner, Alert, Button, OverlayTrigger, Tooltip, Accordion } from 'react-bootstrap';
+import { Row, Col, Form, Card, Spinner, Alert, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import React, { useState, useEffect} from 'react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -114,7 +114,7 @@ const ComprehensiveCalculator = () => {
 
   return (
     <Row> {/* Main Row for two-column layout */}
-      <Col md={5}> {/* Left column for input form */}
+      <Col md={8}> {/* Left column for input form */}
         <Card>
           <Card.Body>
             <Form onSubmit={handleSubmit}>
@@ -247,73 +247,62 @@ const ComprehensiveCalculator = () => {
         </Card>
       </Col>
 
-      <Col md={7}> {/* Right column for results */}
-        {results && (
-          <Accordion defaultActiveKey="0" className="mt-4">
-            {results.map((result, index) => {
-              const recipeName = RECIPES[index].name;
-              const titleGradeStyle = getItemGradeStyle(recipeName, theme);
-              return (
-                <Accordion.Item eventKey={String(index)} key={index}>
-                  <Accordion.Header>
-                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                      <img src={getImagePath(recipeName)} alt={recipeName} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(recipeName, theme) }} />
-                      <span style={{ marginLeft: '8px', color: titleGradeStyle.color, fontWeight: 'bold' }}>
-                        {result.message === '선택된 제작 아이템을 찾을 수 없습니다.' ? '종합 분석 결과' : `${recipeName} 종합 분석 결과`}
-                      </span>
-                      {result.recommendation !== '오류' && (
-                        <span className={`ms-auto badge ${result.recommendation.includes('판매') ? 'bg-warning' : result.recommendation.includes('사용') ? 'bg-info' : 'bg-secondary'}`}>
-                          {result.recommendation}
-                        </span>
-                      )}
+      <Col md={4}> {/* Right column for results */}
+        {results && results.map((result, index) => {
+          const recipeName = RECIPES[index].name;
+          const titleGradeStyle = getItemGradeStyle(recipeName, theme);
+          return (
+            <div key={index} className="mt-4 p-3" style={{ backgroundColor: 'var(--component-bg)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+              <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                <img src={getImagePath(recipeName)} alt={recipeName} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(recipeName, theme) }} />
+                <span style={{ marginLeft: '8px', color: titleGradeStyle.color, fontWeight: 'bold' }}>
+                  {result.message === '선택된 제작 아이템을 찾을 수 없습니다.' ? '종합 분석 결과' : `${recipeName} 종합 분석 결과`}
+                </span>
+                {/* Removed recommendation badge */}
+              </div>
+              <hr />
+              {result.recommendation === '오류' ? (
+                <p>{result.message}</p>
+              ) : (
+                <>
+                  <p className="mb-2" style={{ color: 'var(--text-color)' }}>
+                    <strong>최적 추천:</strong> <strong className="text-primary">{result.recommendation}</strong>
+                  </p>
+                  <p className="mb-2" style={{ color: 'var(--text-color)' }}>
+                    모든 재료 직접 판매 시 총 가치: <strong className="text-warning">{result.totalValueSellAll.toLocaleString()} 골드</strong>
+                  </p>
+                  <p className="mb-2" style={{ color: 'var(--text-color)' }}>
+                    최대 제작 후 판매 시 총 가치: <strong className="text-success">{result.totalValueCraftSell.toLocaleString()} 골드</strong>
+                  </p>
+                  <p className="mb-2" style={{ color: 'var(--text-color)' }}>
+                    최대 제작 후 직접 사용 시 총 가치: <strong className="text-info">{result.totalValueCraftUse.toLocaleString()} 골드</strong>
+                  </p>
+                  <hr />
+                  <p className="mb-0 small" style={{ color: 'var(--text-color)' }}>
+                    * 최대 제작 가능 융화재료: {result.maxCraftsPossible / 10}회 ({result.maxCraftsPossible}개)
+                  </p>
+                  {result.craftSellExchangeSteps.length > 0 && (
+                    <div className="mt-2">
+                      <h6 className="small" style={{ color: 'var(--text-color)' }}>제작/판매 시 필요 교환:</h6>
+                      <ul className="small text-muted">
+                        {result.craftSellExchangeSteps.map((step, stepIndex) => (
+                          <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                            <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.fromMaterial, theme) }} />
+                            <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.fromMaterial, theme).color }}>{step.fromMaterial} x{step.fromAmount}</span>
+                            <span style={{ margin: '0 5px' }}> → </span>
+                            <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.toMaterial, theme) }} />
+                            <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.toMaterial, theme).color }}>{step.toMaterial} x{step.toAmount}</span>
+                            <span style={{ marginLeft: '5px', color: 'var(--text-color)' }}> (x{step.count}회)</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  </Accordion.Header>
-                  <Accordion.Body style={{ backgroundColor: 'var(--component-bg)', borderColor: 'var(--border-color)' }}>
-                    {result.recommendation === '오류' ? (
-                      <p>{result.message}</p>
-                    ) : (
-                      <>
-                        <p className="mb-2" style={{ color: 'var(--text-color)' }}>
-                          <strong>최적 추천:</strong> <strong className="text-primary">{result.recommendation}</strong>
-                        </p>
-                        <p className="mb-2" style={{ color: 'var(--text-color)' }}>
-                          모든 재료 직접 판매 시 총 가치: <strong className="text-warning">{result.totalValueSellAll.toLocaleString()} 골드</strong>
-                        </p>
-                        <p className="mb-2" style={{ color: 'var(--text-color)' }}>
-                          최대 제작 후 판매 시 총 가치: <strong className="text-success">{result.totalValueCraftSell.toLocaleString()} 골드</strong>
-                        </p>
-                        <p className="mb-2" style={{ color: 'var(--text-color)' }}>
-                          최대 제작 후 직접 사용 시 총 가치: <strong className="text-info">{result.totalValueCraftUse.toLocaleString()} 골드</strong>
-                        </p>
-                        <hr />
-                        <p className="mb-0 small" style={{ color: 'var(--text-color)' }}>
-                          * 최대 제작 가능 융화재료: {result.maxCraftsPossible / 10}회 ({result.maxCraftsPossible}개)
-                        </p>
-                        {result.craftSellExchangeSteps.length > 0 && (
-                          <div className="mt-2">
-                            <h6 className="small" style={{ color: 'var(--text-color)' }}>제작/판매 시 필요 교환:</h6>
-                            <ul className="small text-muted">
-                              {result.craftSellExchangeSteps.map((step, stepIndex) => (
-                                <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                                  <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.fromMaterial, theme) }} />
-                                  <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.fromMaterial, theme).color }}>{step.fromMaterial} x{step.fromAmount}</span>
-                                  <span style={{ margin: '0 5px' }}> → </span>
-                                  <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.toMaterial, theme) }} />
-                                  <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.toMaterial, theme).color }}>{step.toMaterial} x{step.toAmount}</span>
-                                  <span style={{ marginLeft: '5px', color: 'var(--text-color)' }}> (x{step.count}회)</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </Accordion.Body>
-                </Accordion.Item>
-              );
-            })}
-          </Accordion>
-        )}
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
       </Col>
     </Row>
   );
