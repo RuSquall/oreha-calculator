@@ -198,6 +198,7 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
                     <Form.Label>제작 수수료 감소율 (%)</Form.Label>
                     <Form.Control
                       type="number"
+                      size="sm" // Added size="sm"
                       min="0"
                       max="100"
                       step="any"
@@ -214,7 +215,7 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
                       <Form.Group className="mb-3" controlId={`fusionPrice-${recipe.name}`}>
                         <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
                             <img src={getImagePath(recipe.name)} alt={recipe.name} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(recipe.name, theme) }} />
-                          <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{recipe.name} 시장 가격 (1개당)</span>
+                          <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{recipe.name}</span>
                         </Form.Label>
                         <InputGroup size="sm">
                           <Form.Control
