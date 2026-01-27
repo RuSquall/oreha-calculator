@@ -2,7 +2,7 @@ import { MaterialName, CraftableItem, Inventory, ComprehensiveAnalysisResult } f
 import { MATERIAL_NAMES, PURCHASABLE_MATERIALS, RECIPES } from '../logic/constants';
 import { analyzeComprehensiveProfit } from '../logic/comprehensiveCalculator';
 import { getItemGradeStyle, getImagePath, getImageBackgroundStyle } from '../logic/grades'; // Updated import
-import { Row, Col, Form, Card, Spinner, Alert, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Row, Col, Form, Card, Spinner, Alert, OverlayTrigger, Tooltip, InputGroup } from 'react-bootstrap';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -169,26 +169,31 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
                             <img src={getImagePath(name)} alt={name} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(name, theme) }} />
                             <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{name}</span>
                           </Form.Label>
-                          <Form.Control
-                          type="number"
-                          min="0"
-                          step="any"
-                          value={prices[name] || ''}
-                          onChange={(e) => handlePriceChange(name, e.target.value)}
-                          placeholder={isLoading ? "..." : "골드"}
-                          disabled={isLoading}
-                        />
-                      </Form.Group>
-                    </Col>
-                  );
-                })}
+                          <InputGroup size="sm">
+                            <Form.Control
+                              type="number"
+                              min="0"
+                              step="any"
+                              value={prices[name] || ''}
+                              onChange={(e) => handlePriceChange(name, e.target.value)}
+                              placeholder={isLoading ? "..." : "골드"}
+                              disabled={isLoading}
+                            />
+                            <InputGroup.Text style={{ backgroundColor: 'var(--component-bg)', borderColor: 'var(--border-color)' }}>
+                              <img src="/gold.png" alt="골드" style={{ width: '16px', height: '16px', marginLeft: '4px' }} />
+                            </InputGroup.Text>
+                          </InputGroup>
+                        </Form.Group>
+                      </Col>
+                    );
+                  })}
               </Row>
 
               <hr className="my-4" />
 
               <h5 className="card-title text-center mb-4">3. 추가 정보 입력</h5>
               <Row>
-                <Col md={6}>
+                <Col xs={6} sm={6} md={4}> {/* Changed from md={6} */}
                   <Form.Group className="mb-3" controlId="craftFeeReduction">
                     <Form.Label>제작 수수료 감소율 (%)</Form.Label>
                     <Form.Control
@@ -205,21 +210,25 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
                 {RECIPES.map(recipe => {
                   const gradeStyle = getItemGradeStyle(recipe.name, theme);
                   return (
-                    <Col md={6} key={`fusionPrice-${recipe.name}`}>
+                    <Col xs={6} sm={6} md={4} key={`fusionPrice-${recipe.name}`}> {/* Changed from md={6} */}
                       <Form.Group className="mb-3" controlId={`fusionPrice-${recipe.name}`}>
                         <Form.Label style={{ display: 'flex', alignItems: 'center' }}>
                             <img src={getImagePath(recipe.name)} alt={recipe.name} style={{ width: '24px', height: '24px', ...getImageBackgroundStyle(recipe.name, theme) }} />
                           <span style={{ marginLeft: '8px', color: gradeStyle.color }}>{recipe.name} 시장 가격 (1개당)</span>
                         </Form.Label>
-                        <Form.Control
-                          type="number"
-                          min="0"
-                          step="any"
-                          value={fusionMaterialPrices[recipe.name] || ''}
-                          onChange={(e) => handleFusionPriceChange(recipe.name, e.target.value)}
-                          placeholder={isLoading ? "..." : "골드"}
-                          disabled={isLoading}
-                        />
+                        <InputGroup size="sm">
+                          <Form.Control
+                            type="number"
+                            min="0"
+                            step="any"
+                            value={fusionMaterialPrices[recipe.name] || ''}
+                            onChange={(e) => handleFusionPriceChange(recipe.name, e.target.value)}
+                            placeholder="골드"
+                          />
+                          <InputGroup.Text style={{ backgroundColor: 'var(--component-bg)', borderColor: 'var(--border-color)' }}>
+                            <img src="/gold.png" alt="골드" style={{ width: '16px', height: '16px', marginLeft: '4px' }} />
+                          </InputGroup.Text>
+                        </InputGroup>
                       </Form.Group>
                     </Col>
                   );

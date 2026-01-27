@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Row, Col, Form, Spinner, Alert, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Container, Row, Col, Form, Spinner, Alert, OverlayTrigger, Tooltip, InputGroup } from 'react-bootstrap';
 import { PURCHASABLE_MATERIALS, RECIPES } from '../logic/constants';
 import { MaterialName, ProfitAnalysisResult, CraftableItem } from '../types/data';
 import { analyzeCraftingProfit } from '../logic/calculator';
@@ -148,26 +148,30 @@ const Calculator: React.FC<CalculatorProps> = ({ apiData, isLoading, error, last
                 <img src={getImagePath(name as MaterialName)} alt={name} width="16" height="16" className="me-1" style={getImageBackgroundStyle(name as MaterialName, theme)} />
                 {name.replace(' 융화 재료', '')}
               </Form.Label>
-              <Form.Control
-                type="number"
-                size="sm"
-                value={
-                  isLoading // 로딩 중일 때
-                  ? '' // 값을 빈 문자열로 설정하여 플레이스홀더가 보이도록 함
-                  : (itemPrices as Record<string, number>)[name] !== undefined 
-                    ? (itemPrices as Record<string, number>)[name]
-                    : (materialPrices as Record<string, number>)[name] || ''
-                }
-                onChange={e => {
-                  if ((itemPrices as Record<string, number>)[name] !== undefined) {
-                    handleItemPriceChange(name as CraftableItem, e.target.value)
-                  } else {
-                    handlePriceChange(name as MaterialName, e.target.value)
+              <InputGroup size="sm">
+                <Form.Control
+                  type="number"
+                  value={
+                    isLoading // 로딩 중일 때
+                    ? '' // 값을 빈 문자열로 설정하여 플레이스홀더가 보이도록 함
+                    : (itemPrices as Record<string, number>)[name] !== undefined 
+                      ? (itemPrices as Record<string, number>)[name]
+                      : (materialPrices as Record<string, number>)[name] || ''
                   }
-                }}
-                placeholder={isLoading ? "..." : "골드"}
-                disabled={isLoading}
-              />
+                  onChange={e => {
+                    if ((itemPrices as Record<string, number>)[name] !== undefined) {
+                      handleItemPriceChange(name as CraftableItem, e.target.value)
+                    } else {
+                      handlePriceChange(name as MaterialName, e.target.value)
+                    }
+                  }}
+                  placeholder={isLoading ? "..." : "골드"}
+                  disabled={isLoading}
+                />
+                <InputGroup.Text style={{ backgroundColor: 'var(--component-bg)', borderColor: 'var(--border-color)' }}>
+                  <img src="/gold.png" alt="골드" style={{ width: '16px', height: '16px', marginLeft: '4px' }} />
+                </InputGroup.Text>
+              </InputGroup>
             </Form.Group>
           </Col>
         ))}
