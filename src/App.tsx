@@ -14,6 +14,31 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
+  const [craftFeeDiscount, setCraftFeeDiscount] = useState<number>(() => {
+    try {
+      const savedDiscount = localStorage.getItem('craftFeeDiscount');
+      return savedDiscount ? JSON.parse(savedDiscount) : 0;
+    } catch (error) {
+      console.error("Failed to parse craftFeeDiscount from localStorage", error);
+      return 0;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('craftFeeDiscount', JSON.stringify(craftFeeDiscount));
+    } catch (error) {
+      console.error("Failed to save craftFeeDiscount to localStorage", error);
+    }
+  }, [craftFeeDiscount]);
+
+  const handleDiscountChange = (value: string) => {
+    const numberValue = Number(value);
+    if (numberValue >= 0 && numberValue <= 100) {
+      setCraftFeeDiscount(numberValue);
+    }
+  };
+
   useEffect(() => {
     const fetchPrices = async () => {
       setIsLoading(true);
@@ -56,6 +81,8 @@ function App() {
               isLoading={isLoading}
               error={error}
               lastUpdated={lastUpdated}
+              craftFeeDiscount={craftFeeDiscount}
+              onDiscountChange={handleDiscountChange}
             />
             <hr className="mt-4"/>
           </div>
@@ -67,6 +94,8 @@ function App() {
                 isLoading={isLoading}
                 error={error}
                 lastUpdated={lastUpdated}
+                craftFeeDiscount={craftFeeDiscount}
+                onDiscountChange={handleDiscountChange}
               />
             </Tab>
             <Tab eventKey="max-producer" title="최대 생산량 계산기">

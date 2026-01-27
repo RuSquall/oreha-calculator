@@ -11,12 +11,13 @@ interface CalculatorProps {
   isLoading: boolean;
   error: string | null;
   lastUpdated: string | null;
+  craftFeeDiscount: number;
+  onDiscountChange: (value: string) => void;
 }
 
-const Calculator: React.FC<CalculatorProps> = ({ apiData, isLoading, error, lastUpdated }) => {
+const Calculator: React.FC<CalculatorProps> = ({ apiData, isLoading, error, lastUpdated, craftFeeDiscount, onDiscountChange }) => {
   const { theme } = useTheme();
   const [materialPrices, setMaterialPrices] = useState<Record<MaterialName, number>>({} as Record<MaterialName, number>);
-  const [craftFeeDiscount, setCraftFeeDiscount] = useState<number>(0);
   const [itemPrices, setItemPrices] = useState<Record<CraftableItem, number>>({
     '상급 아비도스 융화 재료': 0,
     '아비도스 융화 재료': 0,
@@ -48,10 +49,6 @@ const Calculator: React.FC<CalculatorProps> = ({ apiData, isLoading, error, last
 
   const handleItemPriceChange = (name: CraftableItem, value: string) => {
     setItemPrices(prev => ({ ...prev, [name]: Number(value) }));
-  };
-
-  const handleDiscountChange = (value: string) => {
-    setCraftFeeDiscount(Number(value));
   };
 
   const runAnalysis = useCallback(() => {
@@ -108,7 +105,7 @@ const Calculator: React.FC<CalculatorProps> = ({ apiData, isLoading, error, last
                 )}
               </span>
             </Form.Label>
-            <Form.Control type="number" value={craftFeeDiscount} onChange={e => handleDiscountChange(e.target.value)} placeholder="예: 15" />
+            <Form.Control type="number" value={craftFeeDiscount} onChange={e => onDiscountChange(e.target.value)} placeholder="예: 15" />
           </Form.Group>
         </Col>
         

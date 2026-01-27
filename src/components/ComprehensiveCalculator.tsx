@@ -13,9 +13,11 @@ interface ComprehensiveCalculatorProps {
   isLoading: boolean;
   error: string | null;
   lastUpdated: string | null;
+  craftFeeDiscount: number;
+  onDiscountChange: (value: string) => void;
 }
 
-const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiData, isLoading, error, lastUpdated }) => {
+const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiData, isLoading, error, lastUpdated, craftFeeDiscount, onDiscountChange }) => {
   const { theme } = useTheme();
   const [inventory, setInventory] = useState<Inventory>(
     MATERIAL_NAMES.reduce((acc, name) => ({ ...acc, [name]: 0 }), {} as Inventory)
@@ -23,7 +25,6 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
   
   const [prices, setPrices] = useState<Prices>({});
   
-  const [craftFeeReduction, setCraftFeeReduction] = useState<number>(0);
   const [fusionMaterialPrices, setFusionMaterialPrices] = useState<Partial<Record<CraftableItem, number>>>(
     RECIPES.reduce((acc, recipe) => ({ ...acc, [recipe.name]: 0 }), {} as Partial<Record<CraftableItem, number>>)
   );
@@ -85,13 +86,13 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
       return analyzeComprehensiveProfit(
         inventory,
         fullPrices,
-        craftFeeReduction,
+        craftFeeDiscount,
         fusionMaterialPrices[recipe.name] || 0,
         recipe.name
       );
     });
     setResults(allResults);
-  }, [inventory, prices, craftFeeReduction, fusionMaterialPrices]); // Dependencies for useCallback
+  }, [inventory, prices, craftFeeDiscount, fusionMaterialPrices]); // Dependencies for useCallback
 
   useEffect(() => {
     if (Object.keys(prices).length > 0) {
@@ -195,8 +196,8 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
                       min="0"
                       max="100"
                       step="any"
-                      value={craftFeeReduction === 0 ? '' : craftFeeReduction}
-                      onChange={(e) => setCraftFeeReduction(parseFloat(e.target.value) || 0)}
+                      value={craftFeeDiscount === 0 ? '' : craftFeeDiscount}
+                      onChange={(e) => onDiscountChange(e.target.value)}
                       placeholder="예: 15"
                     />
                   </Form.Group>
