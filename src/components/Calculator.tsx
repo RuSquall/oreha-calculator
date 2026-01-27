@@ -6,7 +6,14 @@ import { analyzeCraftingProfit } from '../logic/calculator';
 import { getImagePath, getItemGradeStyle, getImageBackgroundStyle } from '../logic/grades';
 import { useTheme } from '../context/ThemeContext';
 
-const Calculator: React.FC = () => {
+interface CalculatorProps {
+  apiData: Partial<Record<MaterialName, number>>;
+  isLoading: boolean;
+  error: string | null;
+  lastUpdated: string | null;
+}
+
+const Calculator: React.FC<CalculatorProps> = ({ apiData, isLoading, error, lastUpdated }) => {
   const { theme } = useTheme();
   const [materialPrices, setMaterialPrices] = useState<Record<MaterialName, number>>({} as Record<MaterialName, number>);
   const [craftFeeDiscount, setCraftFeeDiscount] = useState<number>(0);
@@ -15,49 +22,25 @@ const Calculator: React.FC = () => {
     '아비도스 융화 재료': 0,
   });
   const [results, setResults] = useState<Record<CraftableItem, ProfitAnalysisResult> | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchPrices = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('/.netlify/functions/getPrices');
-        if (!response.ok) {
-          throw new Error('서버에서 가격 정보를 가져오는 데 실패했습니다.');
-        }
-        const responseData = await response.json();
-        const apiData: Partial<Record<MaterialName, number>> = responseData.prices || {};
-        
-        const newMaterialPrices: Record<MaterialName, number> = {} as Record<MaterialName, number>;
-        const newItemPrices: Record<CraftableItem, number> = {} as Record<CraftableItem, number>;
+    if (Object.keys(apiData).length > 0) {
+      const newMaterialPrices: Record<MaterialName, number> = {} as Record<MaterialName, number>;
+      const newItemPrices: Record<CraftableItem, number> = {} as Record<CraftableItem, number>;
 
-        PURCHASABLE_MATERIALS.forEach(name => {
-          newMaterialPrices[name] = apiData[name] !== undefined ? apiData[name]! : 0;
-        });
+      PURCHASABLE_MATERIALS.forEach(name => {
+        newMaterialPrices[name] = apiData[name] !== undefined ? apiData[name]! : 0;
+      });
 
-        RECIPES.forEach(recipe => {
-          const materialName = recipe.name as MaterialName;
-          newItemPrices[recipe.name] = apiData[materialName] !== undefined ? apiData[materialName]! : 0;
-        });
-        
-        setMaterialPrices(newMaterialPrices);
-        setItemPrices(newItemPrices);
-        setLastUpdated(responseData.lastUpdated);
-
-      } catch (err: any) {
-        setError(err.message);
-        setMaterialPrices({} as Record<MaterialName, number>);
-        setItemPrices({ '상급 아비도스 융화 재료': 0, '아비도스 융화 재료': 0 });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchPrices();
-  }, []);
+      RECIPES.forEach(recipe => {
+        const materialName = recipe.name as MaterialName;
+        newItemPrices[recipe.name] = apiData[materialName] !== undefined ? apiData[materialName]! : 0;
+      });
+      
+      setMaterialPrices(newMaterialPrices);
+      setItemPrices(newItemPrices);
+    }
+  }, [apiData]);
 
   const handlePriceChange = (name: MaterialName, value: string) => {
     setMaterialPrices(prev => ({ ...prev, [name]: Number(value) }));
@@ -80,16 +63,18 @@ const Calculator: React.FC = () => {
         '상급 아비도스 융화 재료': superiorResult,
         '아비도스 융화 재료': normalResult,
       });
-      setError(null);
     } catch (e: any) {
-      setError(e.message || '분석 중 오류가 발생했습니다.');
+      // setError(e.message || '분석 중 오류가 발생했습니다.');
       setResults(null);
     }
   }, [materialPrices, craftFeeDiscount, itemPrices]);
 
   useEffect(() => {
-    runAnalysis();
-  }, [runAnalysis]);
+    // Don't run analysis if prices are not loaded yet
+    if (Object.keys(materialPrices).length > 0 && Object.keys(itemPrices).length > 0) {
+      runAnalysis();
+    }
+  }, [runAnalysis, materialPrices, itemPrices]);
 
   const formatProfit = (profit: number) => {
     const sign = profit > 0 ? '+' : '';
@@ -136,7 +121,7 @@ const Calculator: React.FC = () => {
                   <img src={getImagePath(name)} alt={name} width="24" height="24" className="me-2" style={getImageBackgroundStyle(name, theme)} />
                   {name}
                 </h6>
-                {result ? (
+                {result && !isLoading ? (
                   <>
                     <p className="mb-1 small">판매 이득: <strong className={result.profitFromCraftAndSell >= 0 ? 'text-success' : 'text-danger'}>{formatProfit(result.profitFromCraftAndSell)} G</strong></p>
                     <p className="mb-0 small">사용 이득: <strong className={result.profitFromCraftAndUse >= 0 ? 'text-success' : 'text-danger'}>{formatProfit(result.profitFromCraftAndUse)} G</strong></p>

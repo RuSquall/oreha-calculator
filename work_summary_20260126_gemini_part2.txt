@@ -1,0 +1,58 @@
+## 2026년 1월 26일 Gemini CLI 작업 요약 (Part 2)
+
+이 문서는 2026년 1월 26일 진행된 로스트아크 융화재료 계산기 프로젝트의 추가 작업 내용을 상세히 정리한 것입니다.
+
+---
+
+### 1. Calculator (비용 최적화 계산기) UI/UX 개선
+
+*   **반응형 디자인 개선:**
+    *   767px 이하의 작은 화면에서 가격 입력 필드들이 한 줄로 길게 늘어서는 문제를 해결했습니다.
+    *   `src/components/Calculator.tsx` 파일에서 'Row 2: Price Inputs' 섹션 내의 `Col` 컴포넌트 속성을 `Col md={4} lg`에서 `Col xs={6} sm={6} md={4} lg`로 변경했습니다.
+    *   이를 통해 엑스트라 스몰 및 스몰 화면에서는 2열로, 중간 화면에서는 3열로, 큰 화면에서는 균등하게 배치되도록 하여 가시성과 사용성을 향상시켰습니다.
+
+---
+
+### 2. ComprehensiveCalculator (종합 분석 계산기) UI/UX 개선
+
+**목표:** 모든 입력 및 결과가 한 페이지에 들어오도록 레이아웃을 재구성하고, 사용자 경험을 개선합니다.
+
+*   **입력 필드 레이아웃 조정:**
+    *   '1. 보유 재료 입력' 및 '2. 재료 시세 입력' 섹션에서 각 재료 입력 필드의 `Col` 속성을 `Col md={6}`에서 `Col xs={6} sm={6} md={4} lg={3}`으로 변경했습니다. 이를 통해 작은 화면에서는 2열, 중간 화면에서는 3열, 큰 화면에서는 4열로 배치되도록 하여 수평 밀도를 높였습니다.
+
+*   **결과 섹션 `Accordion` 적용 (초기 시도):**
+    *   `react-bootstrap`의 `Accordion` 컴포넌트를 임포트하고, `results.map`으로 렌더링되는 각 결과를 `Accordion.Item`으로 감쌌습니다.
+    *   `Alert.Heading`을 `Accordion.Header`로, 상세 내용을 `Accordion.Body`로 배치하여 기본적으로 숨겨지고 클릭 시 확장되도록 구현했습니다.
+
+*   **결과 컬럼 너비 및 `Accordion` 기본 확장 조정:**
+    *   사용자 피드백에 따라 오른쪽 결과 컬럼의 너비가 너무 넓다는 의견을 반영하여, 왼쪽 입력 컬럼을 `Col md={8}`로, 오른쪽 결과 컬럼을 `Col md={4}`로 조정했습니다.
+    *   결과가 기본적으로 펼쳐진 상태로 표시되도록 `Accordion` 컴포넌트에 `alwaysOpen={true}` 속성을 추가하고, `defaultActiveKey`를 `["0", "1"]`로 설정했습니다.
+
+*   **`Accordion` 기능 제거 및 결과 직접 표시:**
+    *   사용자 피드백에 따라 결과 창을 열고 닫을 필요가 없다는 의견을 반영하여, `Accordion` 컴포넌트 및 관련 자식 컴포넌트들을 제거했습니다.
+    *   결과 내용은 각 `div` 내부에 직접 표시되도록 변경했으며, 시각적 구분을 위해 `mt-4 p-3` 클래스와 테두리를 적용했습니다.
+
+*   **결과 섹션 내 불필요한 요소 제거:**
+    *   `ms-auto badge bg-secondary` 클래스를 가진 `<span>` 태그 (예: '현재는 수익성이 없습니다.'와 같은 추천 배지)를 제거했습니다.
+
+*   **자동 결과 업데이트 기능 구현:**
+    *   '종합 분석' 버튼 클릭 없이 입력값 변경 시 자동으로 결과가 업데이트되도록 수정했습니다.
+    *   분석 로직을 `useCallback`으로 감싼 `runAnalysis` 함수로 분리하고, `inventory`, `prices`, `craftFeeReduction`, `fusionMaterialPrices` 상태 변경 시 `runAnalysis`를 호출하는 `useEffect` 훅을 추가했습니다.
+    *   `Form` 태그에서 `onSubmit` 속성을 제거하고, '종합 분석' 버튼 자체도 제거했습니다.
+
+*   **오류 수정 (useCallback 임포트 누락):**
+    *   `useCallback`을 사용했으나 React 임포트 문에 추가되지 않아 발생한 `TS2304: Cannot find name 'useCallback'` 오류를 수정했습니다. `import React, { useState, useEffect, useCallback } from 'react';`로 변경했습니다.
+
+*   **오류 수정 (Button 임포트 누락 - 사용자 수정):**
+    *   `ComprehensiveCalculator.tsx`에서 `Button` 컴포넌트를 더 이상 사용하지 않음에도 불구하고 임포트되어 있어 발생한 ESLint 오류(`'Button' is defined but never used`)가 Netlify 빌드 실패의 원인이었습니다. 이 부분은 사용자께서 직접 `react-bootstrap` 임포트 문에서 `Button`을 제거하여 해결해주셨습니다.
+
+---
+
+### 3. 백업 파일 처리
+
+*   사용자 요청에 따라 생성했던 `src/App.bak.tsx` 및 `src/components/Calculator.bak.tsx` 백업 파일의 삭제를 시도했습니다.
+*   `rm` 및 `del` 명령어가 "파일을 찾을 수 없습니다." 오류를 반환하여, 해당 백업 파일들이 이미 존재하지 않음을 확인했습니다.
+
+---
+
+오늘까지의 모든 UI/UX 개선 및 오류 수정 작업이 완료되었습니다.

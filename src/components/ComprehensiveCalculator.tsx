@@ -8,17 +8,21 @@ import { useTheme } from '../context/ThemeContext';
 
 type Prices = Partial<Record<MaterialName, number>>;
 
-const ComprehensiveCalculator = () => {
+interface ComprehensiveCalculatorProps {
+  apiData: Partial<Record<MaterialName, number>>;
+  isLoading: boolean;
+  error: string | null;
+  lastUpdated: string | null;
+}
+
+const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiData, isLoading, error, lastUpdated }) => {
   const { theme } = useTheme();
   const [inventory, setInventory] = useState<Inventory>(
     MATERIAL_NAMES.reduce((acc, name) => ({ ...acc, [name]: 0 }), {} as Inventory)
   );
   
   const [prices, setPrices] = useState<Prices>({});
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
-
+  
   const [craftFeeReduction, setCraftFeeReduction] = useState<number>(0);
   const [fusionMaterialPrices, setFusionMaterialPrices] = useState<Partial<Record<CraftableItem, number>>>(
     RECIPES.reduce((acc, recipe) => ({ ...acc, [recipe.name]: 0 }), {} as Partial<Record<CraftableItem, number>>)
@@ -26,51 +30,29 @@ const ComprehensiveCalculator = () => {
   const [results, setResults] = useState<ComprehensiveAnalysisResult[] | null>(null);
 
   useEffect(() => {
-    const fetchPrices = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('/.netlify/functions/getPrices');
-        if (!response.ok) {
-          throw new Error('서버에서 가격 정보를 가져오는 데 실패했습니다.');
-        }
-        const responseData = await response.json();
-        // Corrected type for apiData: it's a map of MaterialName to number, not ItemPrice object
-        const apiData: Partial<Record<MaterialName, number>> = responseData.prices || {};
-        const newPrices: Prices = {};
-        // No need for updatedTime variable, use responseData.lastUpdated directly
-
-        // Populate newPrices from apiData
-        for (const materialName in apiData) {
-          if (apiData.hasOwnProperty(materialName)) {
-            const typedMaterialName = materialName as MaterialName; // Explicitly cast
-            if (apiData[typedMaterialName] !== undefined) {
-              newPrices[typedMaterialName] = apiData[typedMaterialName]!; // Directly assign the number price
-            }
+    if (Object.keys(apiData).length > 0) {
+      const newPrices: Prices = {};
+      for (const materialName in apiData) {
+        if (apiData.hasOwnProperty(materialName)) {
+          const typedMaterialName = materialName as MaterialName;
+          if (apiData[typedMaterialName] !== undefined) {
+            newPrices[typedMaterialName] = apiData[typedMaterialName]!;
           }
         }
-        setPrices(newPrices);
-        setLastUpdated(responseData.lastUpdated); // Use responseData.lastUpdated directly
-
-        const initialFusionPrices: Partial<Record<CraftableItem, number>> = {};
-        RECIPES.forEach(recipe => {
-          if (newPrices[recipe.name as MaterialName] !== undefined) { // Check if price exists
-            initialFusionPrices[recipe.name] = newPrices[recipe.name as MaterialName]!;
-          } else {
-            initialFusionPrices[recipe.name] = 0;
-          }
-        });
-        setFusionMaterialPrices(initialFusionPrices);
-      } catch (err: any) {
-        setError(err.message);
-        setPrices({});
-      } finally {
-        setIsLoading(false);
       }
-    };
+      setPrices(newPrices);
 
-    fetchPrices();
-  }, []);
+      const initialFusionPrices: Partial<Record<CraftableItem, number>> = {};
+      RECIPES.forEach(recipe => {
+        if (newPrices[recipe.name as MaterialName] !== undefined) {
+          initialFusionPrices[recipe.name] = newPrices[recipe.name as MaterialName]!;
+        } else {
+          initialFusionPrices[recipe.name] = 0;
+        }
+      });
+      setFusionMaterialPrices(initialFusionPrices);
+    }
+  }, [apiData]);
 
   const handleInventoryChange = (name: MaterialName, value: string) => {
     setInventory({
@@ -112,8 +94,10 @@ const ComprehensiveCalculator = () => {
   }, [inventory, prices, craftFeeReduction, fusionMaterialPrices]); // Dependencies for useCallback
 
   useEffect(() => {
-    runAnalysis();
-  }, [runAnalysis]); // Call runAnalysis whenever its dependencies change
+    if (Object.keys(prices).length > 0) {
+      runAnalysis();
+    }
+  }, [runAnalysis, prices]); // Call runAnalysis whenever its dependencies change
 
   return (
     <Row> {/* Main Row for two-column layout */}
@@ -190,7 +174,7 @@ const ComprehensiveCalculator = () => {
                           step="any"
                           value={prices[name] || ''}
                           onChange={(e) => handlePriceChange(name, e.target.value)}
-                          placeholder={isLoading ? "불러오는 중..." : "골드"}
+                          placeholder={isLoading ? "..." : "골드"}
                           disabled={isLoading}
                         />
                       </Form.Group>
@@ -232,7 +216,8 @@ const ComprehensiveCalculator = () => {
                           step="any"
                           value={fusionMaterialPrices[recipe.name] || ''}
                           onChange={(e) => handleFusionPriceChange(recipe.name, e.target.value)}
-                          placeholder="골드"
+                          placeholder={isLoading ? "..." : "골드"}
+                          disabled={isLoading}
                         />
                       </Form.Group>
                     </Col>
