@@ -99,7 +99,16 @@ const Calculator: React.FC<CalculatorProps> = ({ apiData, isLoading, error, last
                         </Tooltip>
                       }
                     >
-                      <span style={{ cursor: 'help' }}>⏰</span>
+                      <span style={{ 
+                        cursor: 'help',
+                        background: 'linear-gradient(135deg,#261331,#480d5d)',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        display: 'inline-block',
+                        lineHeight: '1',
+                      }}>
+                        <img src="/시간.png" alt="업데이트 시간" style={{ width: '16px', height: '16px', filter: 'invert(1)' }} />
+                      </span>
                     </OverlayTrigger>
                   )
                 )}
