@@ -29,10 +29,10 @@ export const RECIPES: Recipe[] = [
 ];
 
 export const MATERIAL_NAMES: MaterialName[] = [
-  '아비도스 목재',
-  '부드러운 목재',
   '목재',
+  '부드러운 목재',
   '튼튼한 목재',
+  '아비도스 목재',
   '벌목의 가루',
 ];
 
