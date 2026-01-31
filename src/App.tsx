@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container, Row, Col, Tabs, Tab, Button } from 'react-bootstrap';
+import { Container, Row, Col, Tabs, Tab, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import Calculator from './components/Calculator';
 import Maximizer from './components/Maximizer';
 import ComprehensiveCalculator from './components/ComprehensiveCalculator';
@@ -62,6 +62,38 @@ function App() {
     fetchPrices();
   }, []);
 
+  const comprehensiveTitle = (
+    <span>
+      종합 분석 계산기
+      <OverlayTrigger
+        placement="top"
+        overlay={
+          <Tooltip id="comprehensive-tooltip">
+            보유 재료 기반으로 '전부 판매', '최대 제작 후 판매', '최대 제작 후 사용' 시나리오 중 최적 행동을 추천합니다.
+          </Tooltip>
+        }
+      >
+        <span style={{ cursor: 'help' }} className="ms-1">❓</span>
+      </OverlayTrigger>
+    </span>
+  );
+
+  const maximizerTitle = (
+    <span>
+      최대 생산량 계산기
+      <OverlayTrigger
+        placement="top"
+        overlay={
+          <Tooltip id="maximizer-tooltip">
+            보유한 재료로 융화 재료를 최대 몇 개까지 만들 수 있는지 계산합니다.
+          </Tooltip>
+        }
+      >
+        <span style={{ cursor: 'help' }} className="ms-1">❓</span>
+      </OverlayTrigger>
+    </span>
+  );
+
   return (
     <Container className="py-5">
       <Row className="justify-content-md-center">
@@ -76,6 +108,19 @@ function App() {
           {/* 비용 최적화 계산기 - 상단 고정 */}
           <div className="mb-4">
             <hr/>
+            <h4 className="text-center mb-3" style={{ color: 'var(--text-color)' }}>
+              비용 최적화 분석
+              <OverlayTrigger
+                placement="top"
+                overlay={
+                  <Tooltip id="calculator-tooltip">
+                    융화 재료 제작의 최적 경로를 분석하고, 제작 후 판매 또는 직접 사용할 때의 이득을 계산합니다.
+                  </Tooltip>
+                }
+              >
+                <span style={{ cursor: 'help' }} className="ms-1">❓</span>
+              </OverlayTrigger>
+            </h4>
             <Calculator 
               apiData={apiData}
               isLoading={isLoading}
@@ -88,7 +133,7 @@ function App() {
           </div>
 
           <Tabs defaultActiveKey="comprehensive-analyzer" id="main-tabs" className="mb-3" fill>
-            <Tab eventKey="comprehensive-analyzer" title="종합 분석 계산기">
+            <Tab eventKey="comprehensive-analyzer" title={comprehensiveTitle}>
               <ComprehensiveCalculator 
                 apiData={apiData}
                 isLoading={isLoading}
@@ -98,7 +143,7 @@ function App() {
                 onDiscountChange={handleDiscountChange}
               />
             </Tab>
-            <Tab eventKey="max-producer" title="최대 생산량 계산기">
+            <Tab eventKey="max-producer" title={maximizerTitle}>
               <Maximizer />
             </Tab>
           </Tabs>
