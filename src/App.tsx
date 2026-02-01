@@ -153,7 +153,7 @@ function App() {
       </Row>
       <div className="theme-toggle-fixed-bottom-right">
         <Button variant={theme === 'dark' ? 'outline-light' : 'outline-dark'} onClick={toggleTheme} size="sm">
-          {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+          {theme === 'dark' ? ' ☀️ ' : ' 🌙 '}
         </Button>
       </div>
     </Container>
