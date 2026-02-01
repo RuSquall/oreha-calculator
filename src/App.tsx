@@ -67,14 +67,14 @@ function App() {
     <span>
       종합 분석 계산기
       <OverlayTrigger
-        placement="top"
+        placement="bottom"
         overlay={
           <Tooltip id="comprehensive-tooltip">
             보유 재료 기반으로 '전부 판매', '최대 제작 후 판매', '최대 제작 후 사용' 시나리오 중 최적 행동을 추천합니다.
           </Tooltip>
         }
       >
-        <span style={{ cursor: 'help' }} className="ms-1">❓</span>
+        <span style={{ cursor: 'help' }} className="ms-1"> 🤔 </span>
       </OverlayTrigger>
     </span>
   );
@@ -83,14 +83,14 @@ function App() {
     <span>
       최대 생산량 계산기
       <OverlayTrigger
-        placement="top"
+        placement="bottom"
         overlay={
           <Tooltip id="maximizer-tooltip">
             보유한 재료로 융화 재료를 최대 몇 개까지 만들 수 있는지 계산합니다.
           </Tooltip>
         }
       >
-        <span style={{ cursor: 'help' }} className="ms-1">❓</span>
+        <span style={{ cursor: 'help' }} className="ms-1"> 🤔 </span>
       </OverlayTrigger>
     </span>
   );
