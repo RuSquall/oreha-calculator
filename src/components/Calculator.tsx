@@ -78,6 +78,12 @@ const Calculator: React.FC<CalculatorProps> = ({ apiData, isLoading, error, last
     return `${sign}${profit.toLocaleString()}`;
   };
 
+  const analysisTooltip = (
+    <Tooltip id="calculator-tooltip">
+      융화 재료 제작의 최적 경로를 분석하고, 제작 후 판매 또는 직접 사용할 때의 이득을 계산합니다.
+    </Tooltip>
+  );
+
   return (
     <Container fluid>
       {/* Row 1: Core Input & Results */}
@@ -128,6 +134,9 @@ const Calculator: React.FC<CalculatorProps> = ({ apiData, isLoading, error, last
                 <h6 className="mb-2 d-flex align-items-center justify-content-center">
                   <img src={getImagePath(name)} alt={name} width="24" height="24" className="me-2" style={getImageBackgroundStyle(name, theme)} />
                   {name}
+                  <OverlayTrigger placement="top" overlay={analysisTooltip}>
+                    <span style={{ cursor: 'help' }} className="ms-1">❓</span>
+                  </OverlayTrigger>
                 </h6>
                 {result && !isLoading ? (
                   <>

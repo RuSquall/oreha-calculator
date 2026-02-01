@@ -108,19 +108,7 @@ function App() {
           {/* 비용 최적화 계산기 - 상단 고정 */}
           <div className="mb-4">
             <hr/>
-            <h4 className="text-center mb-3" style={{ color: 'var(--text-color)' }}>
-              비용 최적화 분석
-              <OverlayTrigger
-                placement="top"
-                overlay={
-                  <Tooltip id="calculator-tooltip">
-                    융화 재료 제작의 최적 경로를 분석하고, 제작 후 판매 또는 직접 사용할 때의 이득을 계산합니다.
-                  </Tooltip>
-                }
-              >
-                <span style={{ cursor: 'help' }} className="ms-1">❓</span>
-              </OverlayTrigger>
-            </h4>
+            
             <Calculator 
               apiData={apiData}
               isLoading={isLoading}
