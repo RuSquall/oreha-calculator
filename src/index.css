@@ -85,3 +85,11 @@ code {
   color: var(--placeholder-color) !important; /* Added !important */
   opacity: 1; /* Override Firefox's lower default opacity */
 }
+
+.theme-toggle-fixed-bottom-right {
+  position: fixed;
+  bottom: 20px; /* Adjust as needed */
+  right: 20px; /* Adjust as needed */
+  z-index: 1000; /* Ensure it's above other content */
+}
+

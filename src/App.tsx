@@ -96,14 +96,12 @@ function App() {
   );
 
   return (
-    <Container className="py-5">
+    <Container className="py-0">
       <Row className="justify-content-md-center">
         <Col md={12}>
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1 className="mb-0 h2" style={{ color: 'var(--text-color)' }}>로스트아크 융화재료 계산기</h1>
-            <Button variant={theme === 'dark' ? 'outline-light' : 'outline-dark'} onClick={toggleTheme} size="sm">
-              {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
-            </Button>
+          <div className="d-flex justify-content-end align-items-center mb-4">
+            {/* <h1 className="mb-0 h2" style={{ color: 'var(--text-color)' }}>로스트아크 융화재료 계산기</h1> */}
+            {/* Button moved */}
           </div>
 
           {/* 비용 최적화 계산기 - 상단 고정 */}
@@ -153,6 +151,11 @@ function App() {
           </Tabs>
         </Col>
       </Row>
+      <div className="theme-toggle-fixed-bottom-right">
+        <Button variant={theme === 'dark' ? 'outline-light' : 'outline-dark'} onClick={toggleTheme} size="sm">
+          {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+        </Button>
+      </div>
     </Container>
   );
 }
