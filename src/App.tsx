@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container, Row, Col, Tabs, Tab, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Container, Row, Col, Tabs, Tab, Button, OverlayTrigger, Tooltip, Collapse } from 'react-bootstrap';
 import Calculator from './components/Calculator';
 import Maximizer from './components/Maximizer';
 import ComprehensiveCalculator from './components/ComprehensiveCalculator';
@@ -13,6 +13,7 @@ function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [showCalculator, setShowCalculator] = useState(true); // 비용 최적화 계산기 접기/펴기 상태
 
   const [craftFeeDiscount, setCraftFeeDiscount] = useState<number>(() => {
     try {
@@ -107,17 +108,32 @@ function App() {
 
           {/* 비용 최적화 계산기 - 상단 고정 */}
           <div className="mb-4">
-            <hr/>
-            
-            <Calculator 
-              apiData={apiData}
-              isLoading={isLoading}
-              error={error}
-              lastUpdated={lastUpdated}
-              craftFeeDiscount={craftFeeDiscount}
-              onDiscountChange={handleDiscountChange}
-            />
-            <hr className="mt-4"/>
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <h2 className="h4 mb-0" style={{ color: 'var(--text-color)' }}>비용 최적화 계산기</h2>
+              <Button
+                variant="outline-secondary"
+                onClick={() => setShowCalculator(!showCalculator)}
+                aria-controls="calculator-collapse"
+                aria-expanded={showCalculator}
+                size="sm"
+              >
+                {showCalculator ? '접기' : '펼치기'}
+              </Button>
+            </div>
+            <Collapse in={showCalculator}>
+              <div id="calculator-collapse">
+                <hr/>
+                <Calculator 
+                  apiData={apiData}
+                  isLoading={isLoading}
+                  error={error}
+                  lastUpdated={lastUpdated}
+                  craftFeeDiscount={craftFeeDiscount}
+                  onDiscountChange={handleDiscountChange}
+                />
+                <hr className="mt-4"/>
+              </div>
+            </Collapse>
           </div>
 
           <Tabs defaultActiveKey="comprehensive-analyzer" id="main-tabs" className="mb-3" fill>
