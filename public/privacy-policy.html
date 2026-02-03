@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>개인정보처리방침</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body { 
+            padding: 2rem; 
+            background-color: #121212; 
+            color: #E0E0E0; 
+        }
+        .container {
+            max-width: 800px;
+        }
+        h1, h2 { 
+            color: #FFFFFF;
+        }
+        h1 { margin-bottom: 1.5rem; }
+        h2 { margin-top: 2rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
+        ul { padding-left: 20px; margin-top: 1rem; }
+        li { margin-bottom: 0.5rem; }
+        a { color: #bb86fc; }
+        a:hover { color: #d1b3ff; }
+        hr { border-top: 1px solid #444; }
+        .back-button-top {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="back-button-top">
+        <button onclick="history.back()" class="btn btn-outline-light btn-sm"> &laquo; 뒤로가기</button>
+    </div>
+
+    <div class="container">
+        <h1>개인정보처리방침</h1>
+        <p class="lead">본 사이트는 로스트아크 제작 계산기를 제공하는 비공식 팬 사이트입니다. 이용자 여러분이 안심하고 사용할 수 있도록, 개인정보와 관련된 사항을 아래와 같이 안내드립니다.</p>
+
+        <h2>1. 개인정보 수집에 대해</h2>
+        <p>본 사이트는 회원가입, 로그인, 댓글, 이메일 입력 등의 기능을 제공하지 않으며, 이름, 연락처, 계정 정보 등 개인을 식별할 수 있는 개인정보를 수집하거나 저장하지 않습니다.</p>
+
+        <h2>2. 로컬스토리지 사용 안내</h2>
+        <p>본 사이트는 이용 편의를 위해 브라우저의 로컬스토리지(Local Storage) 를 사용합니다.</p>
+        <ul>
+            <li><strong>저장되는 정보:</strong> 제작 계산에 사용되는 ‘제작 수수료 감소율’ 값</li>
+            <li><strong>목적:</strong> 다음 방문 시 동일한 값을 다시 입력하지 않아도 되도록 하기 위함</li>
+            <li><strong>특징:</strong> 해당 정보는 이용자의 기기에만 저장되며, 서버로 전송되거나 외부에 공유되지 않습니다. 브라우저 설정을 통해 언제든지 삭제할 수 있습니다.</li>
+        </ul>
+
+        <h2>3. 서버 및 호스팅 관련 안내</h2>
+        <p>본 사이트는 Netlify를 통해 호스팅 및 배포되고 있습니다. 서비스 제공 과정에서 Netlify가 기본적인 접속 로그(예: IP 주소, 접속 시간) 를 자동으로 수집할 수 있으나, 이는 서비스 운영 및 보안 목적에 한정되며 본 사이트가 별도로 저장하거나 활용하지 않습니다.</p>
+
+        <h2>4. 실시간 시세 데이터 처리</h2>
+        <p>실시간 시세 정보 제공을 위해 Upstash를 사용하고 있습니다. 저장되는 데이터는 게임 내 시세 정보에 한정되며, 개인을 식별할 수 있는 정보는 저장하거나 처리하지 않습니다.</p>
+
+        <h2>5. 외부 문의 채널 안내</h2>
+        <p>본 사이트는 별도의 문의 입력 기능을 제공하지 않습니다. 문의는 카카오톡 오픈채팅방을 통해 받고 있으며, 해당 과정에서의 정보 처리는 카카오의 개인정보처리방침을 따릅니다.</p>
+
+        <h2>6. 광고 서비스 도입 가능성</h2>
+        <p>현재 본 사이트에는 광고가 포함되어 있지 않으나, 향후 서비스 운영을 위해 외부 광고 서비스가 추가될 수 있습니다. 이 경우, 광고 제공자는 쿠키 또는 유사 기술을 사용할 수 있으며 관련 내용은 본 방침을 통해 안내드릴 예정입니다.</p>
+
+        <h2>7. PC 환경 기준 서비스 안내</h2>
+        <p>본 사이트는 PC 환경을 기준으로 제작된 서비스입니다. 모바일 기기에서도 접속은 가능하나, 화면 구성 및 사용성은 PC 환경에 최적화되어 있습니다.</p>
+
+        <hr class="mt-4">
+        <p class="mt-3">본 방침은 서비스 내용 변경 시 수정될 수 있으며, 변경 사항은 사이트를 통해 안내됩니다.</p>
+
+        <div class="text-center mt-5 mb-4">
+            <button onclick="history.back()" class="btn btn-outline-light"> &laquo; 뒤로가기</button>
+        </div>
+    </div>
+</body>
+</html>

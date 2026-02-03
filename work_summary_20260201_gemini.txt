@@ -51,7 +51,32 @@
     *   `npm audit` 재실행 결과, 여전히 21개의 취약점 잔존 확인.
     *   남아있는 취약점들은 `react-scripts`의 하위 의존성에 깊이 내재되어 있으며, `npm audit fix --force`는 위험하므로 현재로서는 `create-react-app`의 공식 업데이트를 기다리는 것이 합리적임을 설명.
 
-### 4. 최종 테스트 및 배포
+### 4. UI/UX 개선 및 법적 고지 추가
+
+*   **비용 최적화 계산기 접기/펴기 기능 추가:**
+    *   `App.tsx`에 `showCalculator` 상태 추가 및 `Collapse` 컴포넌트 활용.
+    *   토글 버튼 추가하여 계산기 표시 여부 제어.
+*   **메인 제목 제거 및 테마 버튼 위치 변경:**
+    *   `App.tsx`에서 메인 `h1` 제목 제거.
+    *   테마 토글 버튼을 화면 오른쪽 하단 고정 위치로 이동 (`index.css`에 CSS 추가).
+*   **메인 컨테이너 패딩 조정:**
+    *   `App.tsx`의 메인 `Container` `className`을 `py-5`에서 `py-0`으로 변경하여 상하 패딩 제거.
+*   **툴팁 위치 수정:**
+    *   "종합 분석 계산기" 툴팁이 잘리는 문제 해결을 위해 `App.tsx`에서 `OverlayTrigger`의 `placement`를 `top`에서 `bottom`으로 변경.
+*   **푸터 추가 및 연락처/저작권 정보 포함:**
+    *   `App.tsx`에 푸터 구조 추가.
+    *   카카오톡 오픈채팅 링크 (`https://open.kakao.com/o/s8MHZpei`) 추가.
+    *   저작권 표시 (`© 2026 RGMR All rights reserved.`) 추가.
+    *   저작권자 이름 'Taeu'에서 'RGMR'로 수정.
+*   **면책 조항 (`disclaimer.html`) 추가:**
+    *   `public/disclaimer.html` 파일 생성 및 사용자 친화적인 면책 조항 내용 작성.
+    *   `App.tsx` 푸터에 면책 조항 링크 추가.
+*   **개인정보처리방침 (`privacy-policy.html`) 추가:**
+    *   `public/privacy-policy.html` 파일 생성 및 서비스 특성에 맞는 개인정보처리방침 내용 작성.
+    *   `App.tsx` 푸터에 개인정보처리방침 링크 추가.
+    *   개인정보처리방침 1, 2, 4항의 내용이 님의 서비스 모델에 더 정확하게 맞도록 수정 제안 및 반영 중.
+
+### 5. 최종 테스트 및 배포
 
 *   **로컬 테스트:**
     *   `npm start` (개발 환경) 정상 작동 확인.

@@ -152,7 +152,7 @@ function App() {
         </Col>
       </Row>
       <footer className="text-center mt-5 py-3" style={{ color: 'var(--text-color)', borderTop: '1px solid var(--border-color)' }}>
-        <p className="mb-1">버그 제보 및 문의: <a href="https://open.kakao.com/o/s8MHZpei" target="_blank" rel="noopener noreferrer">카카오톡 오픈채팅</a></p>
+        <p className="mb-1">버그 제보 및 문의: <a href="https://open.kakao.com/o/s8MHZpei" target="_blank" rel="noopener noreferrer">카카오톡 오픈채팅</a> | <a href="/disclaimer.html">면책 조항</a> | <a href="/privacy-policy.html">개인정보처리방침</a></p>
         <p className="mb-0 small">© 2026 RGMR All rights reserved.</p>
       </footer>
       <div className="theme-toggle-fixed-bottom-right">
