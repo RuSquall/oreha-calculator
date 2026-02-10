@@ -110,7 +110,7 @@ export const calculateMaxCrafts = (
             // Apply exchanges
             for (const key in EX) {
                 const ex = EX[key];
-                const count = Math.floor(solution.variables[`y_${key}`] || 0);
+                const count = Math.floor(solutionVariables[`y_${key}`] || 0);
                 if (count > 0) {
                     if (ex.from === materialName) {
                         finalAmount -= count * ex.fromAmount;
