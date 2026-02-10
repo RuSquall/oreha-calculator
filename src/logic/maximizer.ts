@@ -17,7 +17,7 @@ export const calculateMaxCrafts = (
     initialInventory: Inventory,
     targetItemName: CraftableItem
 ): MaximizerResult => {
-    const singleCraftRecipe = getSingleCraftRecipe(targetItemName);
+    const craftRecipeDetails = getSingleCraftRecipe(targetItemName);
 
     // Define a type for the solution object from javascript-lp-solver
     interface LPSolution {
@@ -60,7 +60,7 @@ export const calculateMaxCrafts = (
     // Build variables and constraints
     // For each craft, it consumes materials
     for (const materialName of MATERIAL_NAMES) {
-        const requiredForCraft = singleCraftRecipe[materialName] || 0;
+        const requiredForCraft = craftRecipeDetails[materialName] || 0;
         if (requiredForCraft > 0) {
             model.variables.crafts[materialName] = requiredForCraft;
         }
@@ -78,6 +78,9 @@ export const calculateMaxCrafts = (
     }
 
     const solution: LPSolution = solver.Solve(model) as LPSolution;
+
+    // console.log('Model:', model); // Re-add for debugging
+    // console.log('Solution:', solution); // Re-add for debugging
 
     if (solution.feasible) {
         const maxCrafts = Math.floor(solution.result.crafts);
@@ -105,7 +108,7 @@ export const calculateMaxCrafts = (
             let finalAmount = (initialInventory[materialName] || 0);
 
             // Subtract materials used for crafting
-            finalAmount -= maxCrafts * (singleCraftRecipe[materialName] || 0);
+            finalAmount -= maxCrafts * (craftRecipeDetails[materialName] || 0);
 
             // Apply exchanges
             for (const key in EX) {
@@ -130,6 +133,7 @@ export const calculateMaxCrafts = (
             remainingInventory: remainingInventory,
         };
     } else {
+        console.warn("LP solver did not find an optimal solution (infeasible/unbounded).");
         return { maxCrafts: 0, exchangeSteps: [], remainingInventory: initialInventory };
     }
 };

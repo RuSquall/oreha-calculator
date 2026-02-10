@@ -76,13 +76,13 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
     });
   };
 
-  const runAnalysis = useCallback(() => {
+  const runAnalysis = useCallback(async () => {
     const fullPrices = PURCHASABLE_MATERIALS.reduce((acc, name) => {
         acc[name] = prices[name] || 0;
         return acc;
     }, {} as Record<MaterialName, number>);
 
-    const allResults: ComprehensiveAnalysisResult[] = RECIPES.map(recipe => {
+    const allResults: Promise<ComprehensiveAnalysisResult>[] = RECIPES.map(async recipe => {
       return analyzeComprehensiveProfit(
         inventory,
         fullPrices,
@@ -91,7 +91,7 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
         recipe.name
       );
     });
-    setResults(allResults);
+    setResults(await Promise.all(allResults));
   }, [inventory, prices, craftFeeDiscount, fusionMaterialPrices]); // Dependencies for useCallback
 
   useEffect(() => {

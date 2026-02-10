@@ -13,6 +13,7 @@
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
     "bootstrap": "^5.3.8",
+    "buffer": "^6.0.3",
     "ioredis": "^5.0.0",
     "javascript-lp-solver": "^1.0.3",
     "react": "^19.2.4",
