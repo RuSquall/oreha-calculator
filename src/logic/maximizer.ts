@@ -83,8 +83,10 @@ export const calculateMaxCrafts = (
         const maxCrafts = Math.floor(solution.result.crafts);
         const exchangeSteps: ExchangeStepDetail[] = [];
 
+        const solutionVariables = solution.variables || {};
+
         for (const key in EX) {
-            const count = Math.floor(solution.variables[`y_${key}`] || 0);
+            const count = Math.floor(solutionVariables[`y_${key}`] || 0);
             if (count > 0) {
                 const ex = EX[key];
                 exchangeSteps.push({
