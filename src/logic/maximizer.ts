@@ -19,6 +19,18 @@ export const calculateMaxCrafts = (
 ): MaximizerResult => {
     const singleCraftRecipe = getSingleCraftRecipe(targetItemName);
 
+    // Define a type for the solution object from javascript-lp-solver
+    interface LPSolution {
+        feasible: boolean;
+        result: {
+            crafts: number;
+            [key: string]: number; // Allow other properties
+        };
+        variables: {
+            [key: string]: number; // For exchange variables (y_key)
+        };
+    }
+
     const model: any = {
         optimize: 'crafts',
         opType: 'max',
@@ -65,7 +77,7 @@ export const calculateMaxCrafts = (
         model.variables[varName][ex.to] = ex.toAmount;
     }
 
-    const solution = solver.Solve(model);
+    const solution: LPSolution = solver.Solve(model) as LPSolution;
 
     if (solution.feasible) {
         const maxCrafts = Math.floor(solution.result.crafts);
