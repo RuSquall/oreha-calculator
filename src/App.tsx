@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container, Row, Col, Tabs, Tab, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Container, Row, Col, Tabs, Tab, Button, OverlayTrigger, Tooltip, Collapse } from 'react-bootstrap';
 import Calculator from './components/Calculator';
 import Maximizer from './components/Maximizer';
 import ComprehensiveCalculator from './components/ComprehensiveCalculator';
@@ -13,6 +13,7 @@ function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [showCalculator, setShowCalculator] = useState(true); // 비용 최적화 계산기 접기/펴기 상태
 
   const [craftFeeDiscount, setCraftFeeDiscount] = useState<number>(() => {
     try {
@@ -66,14 +67,14 @@ function App() {
     <span>
       종합 분석 계산기
       <OverlayTrigger
-        placement="top"
+        placement="bottom"
         overlay={
           <Tooltip id="comprehensive-tooltip">
             보유 재료 기반으로 '전부 판매', '최대 제작 후 판매', '최대 제작 후 사용' 시나리오 중 최적 행동을 추천합니다.
           </Tooltip>
         }
       >
-        <span style={{ cursor: 'help' }} className="ms-1">❓</span>
+        <span style={{ cursor: 'help' }} className="ms-1"> 🤔 </span>
       </OverlayTrigger>
     </span>
   );
@@ -82,42 +83,55 @@ function App() {
     <span>
       최대 생산량 계산기
       <OverlayTrigger
-        placement="top"
+        placement="bottom"
         overlay={
           <Tooltip id="maximizer-tooltip">
             보유한 재료로 융화 재료를 최대 몇 개까지 만들 수 있는지 계산합니다.
           </Tooltip>
         }
       >
-        <span style={{ cursor: 'help' }} className="ms-1">❓</span>
+        <span style={{ cursor: 'help' }} className="ms-1"> 🤔 </span>
       </OverlayTrigger>
     </span>
   );
 
   return (
-    <Container className="py-5">
+    <Container className="py-0">
       <Row className="justify-content-md-center">
         <Col md={12}>
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1 className="mb-0 h2" style={{ color: 'var(--text-color)' }}>로스트아크 융화재료 계산기</h1>
-            <Button variant={theme === 'dark' ? 'outline-light' : 'outline-dark'} onClick={toggleTheme} size="sm">
-              {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
-            </Button>
+          <div className="d-flex justify-content-end align-items-center mb-4">
+            {/* <h1 className="mb-0 h2" style={{ color: 'var(--text-color)' }}>로스트아크 융화재료 계산기</h1> */}
+            {/* Button moved */}
           </div>
 
           {/* 비용 최적화 계산기 - 상단 고정 */}
           <div className="mb-4">
-            <hr/>
-            
-            <Calculator 
-              apiData={apiData}
-              isLoading={isLoading}
-              error={error}
-              lastUpdated={lastUpdated}
-              craftFeeDiscount={craftFeeDiscount}
-              onDiscountChange={handleDiscountChange}
-            />
-            <hr className="mt-4"/>
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <h2 className="h4 mb-0" style={{ color: 'var(--text-color)' }}>비용 최적화 계산기</h2>
+              <Button
+                variant="outline-secondary"
+                onClick={() => setShowCalculator(!showCalculator)}
+                aria-controls="calculator-collapse"
+                aria-expanded={showCalculator}
+                size="sm"
+              >
+                {showCalculator ? '접기' : '펼치기'}
+              </Button>
+            </div>
+            <Collapse in={showCalculator}>
+              <div id="calculator-collapse">
+                <hr/>
+                <Calculator 
+                  apiData={apiData}
+                  isLoading={isLoading}
+                  error={error}
+                  lastUpdated={lastUpdated}
+                  craftFeeDiscount={craftFeeDiscount}
+                  onDiscountChange={handleDiscountChange}
+                />
+                <hr className="mt-4"/>
+              </div>
+            </Collapse>
           </div>
 
           <Tabs defaultActiveKey="comprehensive-analyzer" id="main-tabs" className="mb-3" fill>
@@ -137,6 +151,15 @@ function App() {
           </Tabs>
         </Col>
       </Row>
+      <footer className="text-center mt-5 py-3" style={{ color: 'var(--text-color)', borderTop: '1px solid var(--border-color)' }}>
+        <p className="mb-1">버그 제보 및 문의: <a href="https://open.kakao.com/o/s8MHZpei" target="_blank" rel="noopener noreferrer">카카오톡 오픈채팅</a> | <a href="/disclaimer.html">면책 조항</a> | <a href="/privacy-policy.html">개인정보처리방침</a></p>
+        <p className="mb-0 small">© 2026 RGMR All rights reserved.</p>
+      </footer>
+      <div className="theme-toggle-fixed-bottom-right">
+        <Button variant={theme === 'dark' ? 'outline-light' : 'outline-dark'} onClick={toggleTheme} size="sm">
+          {theme === 'dark' ? ' ☀️ ' : ' 🌙 '}
+        </Button>
+      </div>
     </Container>
   );
 }

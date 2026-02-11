@@ -135,7 +135,7 @@ const Calculator: React.FC<CalculatorProps> = ({ apiData, isLoading, error, last
                   <img src={getImagePath(name)} alt={name} width="24" height="24" className="me-2" style={getImageBackgroundStyle(name, theme)} />
                   {name}
                   <OverlayTrigger placement="top" overlay={analysisTooltip}>
-                    <span style={{ cursor: 'help' }} className="ms-1">❓</span>
+                    <span style={{ cursor: 'help' }} className="ms-1"> 🤔 </span>
                   </OverlayTrigger>
                 </h6>
                 {result && !isLoading ? (

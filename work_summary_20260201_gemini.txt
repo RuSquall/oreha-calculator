@@ -1,0 +1,96 @@
+## 2026년 2월 1일 작업 요약 (Gemini CLI)
+
+### 1. 도메인 및 배포 환경 설정
+
+*   **도메인 구입 및 네임서버 설정 논의:**
+    *   가비아에서 도메인 구입 중 '네임서버 설정'에 대한 문의.
+    *   네임서버의 개념 및 '가비아 네임서버' vs '타사 네임서버'의 차이점 설명.
+    *   Netlify 배포 환경에 최적화된 '타사 네임서버' (Netlify 네임서버) 사용 권장.
+    *   Netlify에서 네임서버 주소(예: `dns1.p03.nsone.net`)를 확인하고 가비아에 등록하는 방법 안내.
+    *   도메인 구입 중 Netlify에서 "사이트를 찾을 수 없음" 메시지 발생 시 DNS 전파 지연으로 인한 정상적인 현상임을 설명.
+    *   Netlify에서 네임서버 주소를 얻기 위해 "Set up Netlify DNS" 버튼을 클릭하도록 안내.
+    *   가비아에 Netlify 네임서버를 등록 시 기존 네임서버를 덮어쓰는 방식임을 설명.
+*   **추천 상품 분석:**
+    *   가비아에서 추천하는 '하이웍스', '웹호스팅', '컨테이너호스팅', '워드프레스호스팅' 상품들이 현재 Netlify 배포 환경에는 불필요함을 설명.
+
+### 2. 배포 준비 및 SEO/보안 강화
+
+*   **SPA 리디렉션 규칙 설정:**
+    *   React SPA의 클라이언트 측 라우팅을 위해 `public/_redirects` 파일 생성 (`/* /index.html 200`).
+    *   해당 파일 Git 스테이징 및 커밋/푸시 (`feat: Add Netlify SPA redirect rule`).
+    *   `/some-path`와 같은 경로가 주소창에 유지되는 것이 SPA의 정상적인 동작임을 설명.
+*   **`index.html` 메타데이터 업데이트:**
+    *   `public/index.html` 파일의 `og:description` 내용을 `remaining_tasks.txt`에 맞춰 업데이트.
+    *   `og:url` 메타 태그 추가 (`https://oreha-calc.site`).
+*   **빌드 스크립트 최적화:**
+    *   `package.json`의 `build` 스크립트를 `GENERATE_SOURCEMAP=false react-scripts build`로 변경하여 프로덕션 빌드 시 소스맵 생성을 비활성화.
+*   **보안 헤더 설정 (`netlify.toml`):**
+    *   `netlify.toml` 파일에 `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Strict-Transport-Security`, `Content-Security-Policy` 등 HTTP 보안 헤더 추가.
+    *   각 헤더의 역할 및 보안 강화 효과 설명.
+    *   배포된 사이트에서 보안 헤더가 정상적으로 적용되었음을 확인.
+*   **사이트맵(Sitemap) 생성:**
+    *   SEO 향상을 위해 `public/sitemap.xml` 파일 생성.
+    *   사이트맵이 검색 엔진의 페이지 발견 및 색인화에 어떻게 도움이 되는지 설명.
+
+### 3. 보안 취약점 분석 및 의존성 관리
+
+*   **프로젝트 코드 전체 분석:**
+    *   `src/`, `netlify/functions/`, `netlify.toml` 등 주요 코드베이스 분석을 통해 프로젝트 구조 및 기술 스택 파악.
+*   **보안 취약점 및 보완점 논의:**
+    *   **CSP 강화:** `'unsafe-inline'`, `'unsafe-eval'` 지시어 제거를 통한 XSS 방어 강화 (복잡한 작업).
+    *   **의존성 취약점 정기 검사:** `npm audit`을 통한 취약점 확인.
+    *   **Netlify Functions Rate Limiting:** 과도한 API 호출 방지 (플랫폼 설정).
+    *   **Netlify 계정 보안:** 강력한 비밀번호 및 2FA 사용.
+*   **`npm audit` 실행 및 의존성 업그레이드 시도:**
+    *   `npm audit` 실행 결과 22개의 취약점(16 보통, 6 높음) 발견.
+    *   `npm audit fix` 실행 후 1개의 취약점 해결, 21개 취약점 잔존.
+    *   `react-scripts` 및 핵심 React 의존성(`react`, `react-dom`, `@types/*`)을 최신 버전으로 업그레이드 시도.
+    *   `npm start` 컴파일 오류(`ENOENT`) 발생.
+    *   **오류 해결:** `node_modules` 및 `package-lock.json` 삭제 후 `npm install` 재실행.
+    *   Windows 환경 변수 설정 문제 해결을 위해 `cross-env` 설치 및 `package.json` 빌드 스크립트 수정.
+    *   `npm audit` 재실행 결과, 여전히 21개의 취약점 잔존 확인.
+    *   남아있는 취약점들은 `react-scripts`의 하위 의존성에 깊이 내재되어 있으며, `npm audit fix --force`는 위험하므로 현재로서는 `create-react-app`의 공식 업데이트를 기다리는 것이 합리적임을 설명.
+
+### 4. UI/UX 개선 및 법적 고지 추가
+
+*   **비용 최적화 계산기 접기/펴기 기능 추가:**
+    *   `App.tsx`에 `showCalculator` 상태 추가 및 `Collapse` 컴포넌트 활용.
+    *   토글 버튼 추가하여 계산기 표시 여부 제어.
+*   **메인 제목 제거 및 테마 버튼 위치 변경:**
+    *   `App.tsx`에서 메인 `h1` 제목 제거.
+    *   테마 토글 버튼을 화면 오른쪽 하단 고정 위치로 이동 (`index.css`에 CSS 추가).
+*   **메인 컨테이너 패딩 조정:**
+    *   `App.tsx`의 메인 `Container` `className`을 `py-5`에서 `py-0`으로 변경하여 상하 패딩 제거.
+*   **툴팁 위치 수정:**
+    *   "종합 분석 계산기" 툴팁이 잘리는 문제 해결을 위해 `App.tsx`에서 `OverlayTrigger`의 `placement`를 `top`에서 `bottom`으로 변경.
+*   **푸터 추가 및 연락처/저작권 정보 포함:**
+    *   `App.tsx`에 푸터 구조 추가.
+    *   카카오톡 오픈채팅 링크 (`https://open.kakao.com/o/s8MHZpei`) 추가.
+    *   저작권 표시 (`© 2026 RGMR All rights reserved.`) 추가.
+    *   저작권자 이름 'Taeu'에서 'RGMR'로 수정.
+*   **면책 조항 (`disclaimer.html`) 추가:**
+    *   `public/disclaimer.html` 파일 생성 및 사용자 친화적인 면책 조항 내용 작성.
+    *   `App.tsx` 푸터에 면책 조항 링크 추가.
+*   **개인정보처리방침 (`privacy-policy.html`) 추가:**
+    *   `public/privacy-policy.html` 파일 생성 및 서비스 특성에 맞는 개인정보처리방침 내용 작성.
+    *   `App.tsx` 푸터에 개인정보처리방침 링크 추가.
+    *   개인정보처리방침 1, 2, 4항의 내용이 님의 서비스 모델에 더 정확하게 맞도록 수정 제안 및 반영 중.
+
+### 5. 최종 테스트 및 배포
+
+*   **로컬 테스트:**
+    *   `npm start` (개발 환경) 정상 작동 확인.
+    *   `npm run build` (프로덕션 빌드) 성공 확인.
+    *   `serve -s build` (로컬 프로덕션 환경) 정상 작동 확인.
+*   **Git 브랜치 관리:**
+    *   `upgrade-dependencies-backup` 브랜치를 `feature/dependencies`로 변경.
+    *   로컬 Git 저장소에서 원격 브랜치 변경 사항 반영 및 새 브랜치로 전환 방법 안내.
+*   **Netlify 배포 확인:**
+    *   `feature/dependencies` 브랜치로 배포된 Netlify 사이트에서 모든 기능 및 UI/UX 정상 작동 확인.
+    *   SPA 리디렉션 (`/some-path` 유지) 정상 동작 확인.
+    *   보안 헤더 정상 적용 확인.
+*   **`master` 브랜치 병합 및 최종 배포:**
+    *   `feature/dependencies` 브랜치를 `master` 브랜치로 병합하고 GitHub에 푸시하여 최종 운영 환경 배포 완료.
+    *   `npm audit` 최종 확인 결과, 21개 취약점 잔존 확인.
+
+---
