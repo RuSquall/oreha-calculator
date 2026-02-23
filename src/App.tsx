@@ -13,6 +13,8 @@ function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [isCached, setIsCached] = useState<boolean>(false);
+  const [cacheWarning, setCacheWarning] = useState<string | null>(null);
   const [showCalculator, setShowCalculator] = useState(true); // 비용 최적화 계산기 접기/펴기 상태
 
   const [craftFeeDiscount, setCraftFeeDiscount] = useState<number>(() => {
@@ -40,26 +42,37 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    const fetchPrices = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('/.netlify/functions/getPrices');
-        if (!response.ok) {
-          throw new Error('서버에서 가격 정보를 가져오는 데 실패했습니다.');
-        }
-        const responseData = await response.json();
-        setApiData(responseData.prices || {});
-        setLastUpdated(responseData.lastUpdated);
-      } catch (err: any) {
-        setError(err.message);
-        setApiData({});
-      } finally {
-        setIsLoading(false);
+  const fetchPrices = async () => {
+    setIsLoading(true);
+    setError(null);
+    setCacheWarning(null);
+    try {
+      const response = await fetch('/.netlify/functions/getPrices');
+      if (!response.ok) {
+        throw new Error('시세 정보를 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.');
       }
-    };
+      const responseData = await response.json();
+      
+      if (responseData.message && !responseData.prices) {
+        throw new Error(responseData.message);
+      }
+      
+      setApiData(responseData.prices || {});
+      setLastUpdated(responseData.lastUpdated);
+      setIsCached(responseData.isCached || false);
+      
+      if (responseData.cacheWarning) {
+        setCacheWarning(responseData.cacheWarning);
+      }
+    } catch (err: any) {
+      setError(err.message || '시세 정보를 불러오는 중 오류가 발생했습니다.');
+      setApiData({});
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchPrices();
   }, []);
 
@@ -104,6 +117,58 @@ function App() {
             {/* Button moved */}
           </div>
 
+          {/* 캐시/에러 경고 배너 */}
+          {cacheWarning && (
+            <div style={{ 
+              backgroundColor: 'var(--component-bg)', 
+              border: '1px solid var(--border-color)', 
+              borderRadius: '0.25rem', 
+              padding: '0.75rem 1rem', 
+              marginBottom: '1rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <span style={{ color: 'var(--text-color)' }}>
+                <strong>⚠️ {cacheWarning}</strong>
+              </span>
+              <Button 
+                variant="outline-primary" 
+                size="sm" 
+                onClick={fetchPrices}
+                disabled={isLoading}
+              >
+                {isLoading ? '로딩 중...' : '시세 새로고침'}
+              </Button>
+            </div>
+          )}
+
+          {error && !cacheWarning && (
+            <div style={{ 
+              backgroundColor: '#f8d7da', 
+              color: '#721c24', 
+              border: '1px solid #f5c6cb', 
+              borderRadius: '0.25rem', 
+              padding: '0.75rem 1rem', 
+              marginBottom: '1rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <span>
+                <strong>❌ 오류: {error}</strong>
+              </span>
+              <Button 
+                variant="outline-danger" 
+                size="sm" 
+                onClick={fetchPrices}
+                disabled={isLoading}
+              >
+                {isLoading ? '로딩 중...' : '다시 시도'}
+              </Button>
+            </div>
+          )}
+
           {/* 비용 최적화 계산기 - 상단 고정 */}
           <div className="mb-4">
             <div className="d-flex justify-content-between align-items-center mb-2">
@@ -126,8 +191,10 @@ function App() {
                   isLoading={isLoading}
                   error={error}
                   lastUpdated={lastUpdated}
+                  isCached={isCached}
                   craftFeeDiscount={craftFeeDiscount}
                   onDiscountChange={handleDiscountChange}
+                  onRefresh={fetchPrices}
                 />
                 <hr className="mt-4"/>
               </div>
@@ -141,8 +208,10 @@ function App() {
                 isLoading={isLoading}
                 error={error}
                 lastUpdated={lastUpdated}
+                isCached={isCached}
                 craftFeeDiscount={craftFeeDiscount}
                 onDiscountChange={handleDiscountChange}
+                onRefresh={fetchPrices}
               />
             </Tab>
             <Tab eventKey="max-producer" title={maximizerTitle}>

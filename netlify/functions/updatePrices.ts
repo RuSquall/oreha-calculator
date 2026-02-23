@@ -126,7 +126,9 @@ export const handler: Handler = async (_event, context) => {
   };
 
   try {
+    // Save both latest and cached prices (for fallback)
     await redis.set("latest_prices", JSON.stringify(responseData));
+    await redis.set("cached_prices", JSON.stringify(responseData)); // Also save as cache for fallback
     console.log("Successfully updated prices to Upstash Redis.", responseData);
     return {
       statusCode: allSucceeded ? 200 : 500,

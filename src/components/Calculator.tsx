@@ -11,11 +11,13 @@ interface CalculatorProps {
   isLoading: boolean;
   error: string | null;
   lastUpdated: string | null;
+  isCached?: boolean;
   craftFeeDiscount: number;
   onDiscountChange: (value: string) => void;
+  onRefresh?: () => void;
 }
 
-const Calculator: React.FC<CalculatorProps> = ({ apiData, isLoading, error, lastUpdated, craftFeeDiscount, onDiscountChange }) => {
+const Calculator: React.FC<CalculatorProps> = ({ apiData, isLoading, error, lastUpdated, isCached, craftFeeDiscount, onDiscountChange, onRefresh }) => {
   const { theme } = useTheme();
   const [materialPrices, setMaterialPrices] = useState<Record<MaterialName, number>>({} as Record<MaterialName, number>);
   const [itemPrices, setItemPrices] = useState<Record<CraftableItem, number>>({
@@ -101,13 +103,16 @@ const Calculator: React.FC<CalculatorProps> = ({ apiData, isLoading, error, last
                       placement="top"
                       overlay={
                         <Tooltip id="update-time-tooltip">
-                          마지막 시세 업데이트: {new Date(lastUpdated).toLocaleString()}
+                          <div style={{ textAlign: 'left' }}>
+                            <div>마지막 시세 업데이트: {new Date(lastUpdated).toLocaleString()}</div>
+                            {isCached && <div style={{ marginTop: '4px', color: '#ffeb3b', fontWeight: 'bold' }}>⚠️ 캐시된 시세를 표시 중입니다</div>}
+                          </div>
                         </Tooltip>
                       }
                     >
                       <span style={{
                         cursor: 'help',
-                        background: 'linear-gradient(135deg,#261331,#480d5d)',
+                        background: isCached ? 'linear-gradient(135deg,#8b4513,#a0522d)' : 'linear-gradient(135deg,#261331,#480d5d)',
                         display: 'inline-flex',
                         alignItems: 'center',
                         justifyContent: 'center',

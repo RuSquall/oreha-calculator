@@ -19,31 +19,54 @@ export const handler: Handler = async (event, context) => {
   });
 
   try {
+    // Try to get the latest prices first
     const latestPricesString = await redis.get("latest_prices");
-    redis.disconnect(); // Disconnect Redis after use
-
-    if (!latestPricesString) {
+    
+    if (latestPricesString) {
+      const latestPrices = JSON.parse(latestPricesString);
+      redis.disconnect();
       return {
-        statusCode: 404,
+        statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: "아직 가격 정보가 없습니다. 잠시 후 다시 시도해 주세요." }),
+        body: JSON.stringify({ ...latestPrices, isCached: false }),
       };
     }
 
-    const latestPrices = JSON.parse(latestPricesString);
+    // Fallback to cached prices if latest prices don't exist
+    const cachedPricesString = await redis.get("cached_prices");
+    redis.disconnect();
+
+    if (cachedPricesString) {
+      const cachedPrices = JSON.parse(cachedPricesString);
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          ...cachedPrices, 
+          isCached: true,
+          cacheWarning: "현재 최신 가격을 불러올 수 없습니다. 마지막으로 저장된 가격을 표시하고 있습니다."
+        }),
+      };
+    }
 
     return {
-      statusCode: 200,
+      statusCode: 404,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(latestPrices),
+      body: JSON.stringify({ 
+        message: "아직 가격 정보가 없습니다. 시세 업데이트를 기다려 주세요.",
+        isCached: false
+      }),
     };
   } catch (error: any) {
     console.error("Error fetching prices from Redis:", error.message || error);
-    redis.disconnect(); // Ensure Redis connection is closed on error
+    redis.disconnect();
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: "Redis에서 가격 정보를 가져오는 중 오류가 발생했습니다." }),
+      body: JSON.stringify({ 
+        message: "시세 정보를 불러오는 중 오류가 발생했습니다.",
+        isCached: false
+      }),
     };
   }
 };

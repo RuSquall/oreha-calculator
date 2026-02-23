@@ -13,11 +13,13 @@ interface ComprehensiveCalculatorProps {
   isLoading: boolean;
   error: string | null;
   lastUpdated: string | null;
+  isCached?: boolean;
   craftFeeDiscount: number;
   onDiscountChange: (value: string) => void;
+  onRefresh?: () => void;
 }
 
-const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiData, isLoading, error, lastUpdated, craftFeeDiscount, onDiscountChange }) => {
+const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiData, isLoading, error, lastUpdated, isCached, craftFeeDiscount, onDiscountChange, onRefresh }) => {
   const { theme } = useTheme();
   const [inventory, setInventory] = useState<Inventory>(
     MATERIAL_NAMES.reduce((acc, name) => ({ ...acc, [name]: 0 }), {} as Inventory)
@@ -145,13 +147,16 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
                       placement="top"
                       overlay={
                         <Tooltip id="update-time-tooltip-comprehensive">
-                          마지막 시세 업데이트: {new Date(lastUpdated).toLocaleString()}
+                          <div style={{ textAlign: 'left' }}>
+                            <div>마지막 시세 업데이트: {new Date(lastUpdated).toLocaleString()}</div>
+                            {isCached && <div style={{ marginTop: '4px', color: '#ffeb3b', fontWeight: 'bold' }}>⚠️ 캐시된 시세를 표시 중입니다</div>}
+                          </div>
                         </Tooltip>
                       }
                     >
                       <span style={{
                         cursor: 'help',
-                        background: 'linear-gradient(135deg,#261331,#480d5d)',
+                        background: isCached ? 'linear-gradient(135deg,#8b4513,#a0522d)' : 'linear-gradient(135deg,#261331,#480d5d)',
                         display: 'inline-flex',
                         alignItems: 'center',
                         justifyContent: 'center',
