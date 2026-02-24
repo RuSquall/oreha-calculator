@@ -26,6 +26,11 @@ const Maximizer = () => {
     });
   };
 
+  const handleResetInventory = () => {
+    setInventory(MATERIAL_NAMES.reduce((acc, name) => ({ ...acc, [name]: 0 }), {} as Inventory));
+    setResults(initialResults); // 결과도 함께 초기화
+  };
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const allResults: MaximizerResult[] = RECIPES.map(recipe => {
@@ -40,7 +45,19 @@ const Maximizer = () => {
         <Card>
           <Card.Body>
             <Form onSubmit={handleSubmit}>
-              <h5 className="card-title text-center mb-4">1. 보유 재료 입력</h5>
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <div style={{ width: '60px' }}></div> {/* Spacer for symmetry */}
+                <h5 className="card-title mb-0">1. 보유 재료 입력</h5>
+                <Button 
+                  variant="outline-secondary" 
+                  size="sm" 
+                  onClick={handleResetInventory}
+                  title="모든 보유 수량을 0으로 초기화합니다."
+                  style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
+                >
+                  초기화
+                </Button>
+              </div>
               <Row>
                 {MATERIAL_NAMES.map((name) => {
                   const gradeStyle = getItemGradeStyle(name, theme);

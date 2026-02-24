@@ -2,7 +2,7 @@ import { MaterialName, CraftableItem, Inventory, ComprehensiveAnalysisResult } f
 import { MATERIAL_NAMES, PURCHASABLE_MATERIALS, RECIPES } from '../logic/constants';
 import { analyzeComprehensiveProfit } from '../logic/comprehensiveCalculator';
 import { getItemGradeStyle, getImagePath, getImageBackgroundStyle } from '../logic/grades'; // Updated import
-import { Row, Col, Form, Card, Spinner, Alert, OverlayTrigger, Tooltip, InputGroup } from 'react-bootstrap';
+import { Row, Col, Form, Card, Spinner, Alert, OverlayTrigger, Tooltip, InputGroup, Button } from 'react-bootstrap';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -71,6 +71,10 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
     });
   };
 
+  const handleResetInventory = () => {
+    setInventory(MATERIAL_NAMES.reduce((acc, name) => ({ ...acc, [name]: 0 }), {} as Inventory));
+  };
+
   const handleFusionPriceChange = (name: CraftableItem, value: string) => {
     setFusionMaterialPrices({
       ...fusionMaterialPrices,
@@ -108,7 +112,19 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
         <Card>
           <Card.Body>
             <Form> {/* Removed onSubmit={handleSubmit} */}
-              <h5 className="card-title text-center mb-4">1. 보유 재료 입력</h5>
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <div style={{ width: '60px' }}></div> {/* Spacer for symmetry */}
+                <h5 className="card-title mb-0">1. 보유 재료 입력</h5>
+                <Button 
+                  variant="outline-secondary" 
+                  size="sm" 
+                  onClick={handleResetInventory}
+                  title="모든 보유 수량을 0으로 초기화합니다."
+                  style={{ fontSize: '1rem', padding: '0.2rem 0.5rem' }}
+                >
+                  초기화
+                </Button>
+              </div>
               <Row>
                 {MATERIAL_NAMES.map((name) => {
                   const gradeStyle = getItemGradeStyle(name, theme);
@@ -150,20 +166,25 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
                           <div style={{ textAlign: 'left' }}>
                             <div>마지막 시세 업데이트: {new Date(lastUpdated).toLocaleString()}</div>
                             {isCached && <div style={{ marginTop: '4px', color: '#ffeb3b', fontWeight: 'bold' }}>⚠️ 캐시된 시세를 표시 중입니다</div>}
+                            <div style={{ marginTop: '4px', fontSize: '0.8em', opacity: 0.8 }}>아이콘을 클릭하여 시세를 새로고침합니다.</div>
                           </div>
                         </Tooltip>
                       }
                     >
-                      <span style={{
-                        cursor: 'help',
-                        background: isCached ? 'linear-gradient(135deg,#8b4513,#a0522d)' : 'linear-gradient(135deg,#261331,#480d5d)',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '24px',
-                        height: '24px',
-                        verticalAlign: 'middle',
-                      }}>
+                      <span 
+                        onClick={onRefresh}
+                        style={{
+                          cursor: onRefresh ? 'pointer' : 'help',
+                          background: isCached ? 'linear-gradient(135deg,#8b4513,#a0522d)' : 'linear-gradient(135deg,#261331,#480d5d)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '24px',
+                          height: '24px',
+                          verticalAlign: 'middle',
+                          borderRadius: '4px'
+                        }}
+                      >
                         <img src="/시간.png" alt="업데이트 시간" style={{ width: '100%', height: '100%' }} />
                       </span>
                     </OverlayTrigger>
