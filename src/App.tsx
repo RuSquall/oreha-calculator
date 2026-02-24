@@ -13,7 +13,7 @@ function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
-  const [isCached, setIsCached] = useState<boolean>(false);
+  const [isCached, setIsCached] = useState<boolean>(true);
   const [cacheWarning, setCacheWarning] = useState<string | null>(null);
   const [showCalculator, setShowCalculator] = useState(true); // 비용 최적화 계산기 접기/펴기 상태
 
