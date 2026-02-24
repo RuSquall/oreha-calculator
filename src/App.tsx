@@ -13,8 +13,8 @@ function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
-  const [isCached, setIsCached] = useState<boolean>(true);
-  const [cacheWarning, setCacheWarning] = useState<string | null>("현재 최신 가격을 불러올 수 없습니다. 마지막으로 저장된 가격을 표시하고 있습니다.");
+  const [isCached, setIsCached] = useState<boolean>(false);
+  const [cacheWarning, setCacheWarning] = useState<string | null>(null);
   const [showCalculator, setShowCalculator] = useState(true); // 비용 최적화 계산기 접기/펴기 상태
 
   const [craftFeeDiscount, setCraftFeeDiscount] = useState<number>(() => {
@@ -45,7 +45,7 @@ function App() {
   const fetchPrices = async () => {
     setIsLoading(true);
     setError(null);
-    //setCacheWarning(null);
+    setCacheWarning(null);
     try {
       const response = await fetch('/.netlify/functions/getPrices');
       if (!response.ok) {
