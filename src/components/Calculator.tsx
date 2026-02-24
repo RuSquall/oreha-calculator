@@ -106,20 +106,25 @@ const Calculator: React.FC<CalculatorProps> = ({ apiData, isLoading, error, last
                           <div style={{ textAlign: 'left' }}>
                             <div>마지막 시세 업데이트: {new Date(lastUpdated).toLocaleString()}</div>
                             {isCached && <div style={{ marginTop: '4px', color: '#ffeb3b', fontWeight: 'bold' }}>⚠️ 캐시된 시세를 표시 중입니다</div>}
+                            <div style={{ marginTop: '4px', fontSize: '0.8em', opacity: 0.8 }}>아이콘을 클릭하여 시세를 새로고침합니다.</div>
                           </div>
                         </Tooltip>
                       }
                     >
-                      <span style={{
-                        cursor: 'help',
-                        background: isCached ? 'linear-gradient(135deg,#8b4513,#a0522d)' : 'linear-gradient(135deg,#261331,#480d5d)',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '24px',
-                        height: '24px',
-                        verticalAlign: 'middle',
-                      }}>
+                      <span 
+                        onClick={onRefresh}
+                        style={{
+                          cursor: onRefresh ? 'pointer' : 'help',
+                          background: isCached ? 'linear-gradient(135deg,#8b4513,#a0522d)' : 'linear-gradient(135deg,#261331,#480d5d)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '24px',
+                          height: '24px',
+                          verticalAlign: 'middle',
+                          borderRadius: '4px'
+                        }}
+                      >
                         <img src="/시간.png" alt="업데이트 시간" style={{ width: '100%', height: '100%' }} />
                       </span>
                     </OverlayTrigger>
