@@ -115,7 +115,7 @@ const Maximizer = () => {
               {result.exchangeSteps.length > 0 && (
                 <>
                   <h6 style={{ color: 'var(--text-color)' }}>필요 교환 목록:</h6>
-                  <ul>
+                  <ul style={{ paddingLeft: '0', listStyleType: 'none' }}>
                     {result.exchangeSteps.map((step, stepIndex) => {
                       const fromGradeStyle = getItemGradeStyle(step.fromMaterial, theme);
                       const toGradeStyle = getItemGradeStyle(step.toMaterial, theme);

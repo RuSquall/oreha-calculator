@@ -315,7 +315,7 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
                     {result.craftSellExchangeSteps.length > 0 && (
                       <div className="mt-2">
                         <h6 className="small" style={{ color: 'var(--text-color)' }}>제작/판매 시 필요 교환:</h6>
-                        <ul className="small text-muted">
+                        <ul className="small text-muted" style={{ paddingLeft: '0', listStyleType: 'none' }}>
                           {result.craftSellExchangeSteps.map((step, stepIndex) => (
                             <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
                               <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.fromMaterial, theme) }} />
