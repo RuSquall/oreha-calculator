@@ -45,7 +45,7 @@ function App() {
   const fetchPrices = async () => {
     setIsLoading(true);
     setError(null);
-    setCacheWarning(null);
+    //setCacheWarning(null);
     try {
       const response = await fetch('/.netlify/functions/getPrices');
       if (!response.ok) {
