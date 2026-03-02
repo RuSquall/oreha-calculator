@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "로아 융화 계산기",
+  "name": "로스트아크 융화 재료 계산기",
   "icons": [
     {
       "src": "favicon.ico",
