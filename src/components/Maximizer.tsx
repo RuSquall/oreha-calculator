@@ -130,17 +130,43 @@ const Maximizer = () => {
                           const fromGradeStyle = getItemGradeStyle(step.fromMaterial, theme);
                           const toGradeStyle = getItemGradeStyle(step.toMaterial, theme);
                           return (
-                            <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                              <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.fromMaterial, theme) }} />
-                              <span style={{ marginLeft: '5px', color: fromGradeStyle.color, fontWeight: 'bold' }}>{step.fromMaterial} x{step.fromAmount}</span>
-                              <span style={{ margin: '0 5px' }}> → </span>
-                              <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.toMaterial, theme) }} />
-                              <span style={{ marginLeft: '5px', color: toGradeStyle.color, fontWeight: 'bold' }}>{step.toMaterial} x{step.toAmount}</span>
-                              <span style={{ marginLeft: '5px', color: 'var(--text-color)' }}> (x{step.count}회)</span>
+                            <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '12px', fontSize: '1.1rem' }}>
+                              {/* From Material Group */}
+                              <div style={{ display: 'flex', alignItems: 'center', width: '220px' }}> {/* Increased width to accommodate name */}
+                                <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '32px', height: '32px', ...getImageBackgroundStyle(step.fromMaterial, theme) }} />
+                                <span style={{ marginLeft: '8px', color: fromGradeStyle.color, fontWeight: 'bold' }}>{step.fromMaterial}</span>
+                                <span style={{ marginLeft: 'auto', color: fromGradeStyle.color, fontWeight: 'bold' }}>x{step.fromAmount}</span>
+                              </div>
+
+                              {/* Strong Arrow */}
+                              <span style={{ margin: '0 15px', color: '#ffc107', fontWeight: '900', fontSize: '1.5rem' }}> → </span>
+
+                              {/* To Material Group */}
+                              <div style={{ display: 'flex', alignItems: 'center', width: '210px' }}> {/* Increased width to accommodate name */}
+                                <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '32px', height: '32px', ...getImageBackgroundStyle(step.toMaterial, theme) }} />
+                                <span style={{ marginLeft: '8px', color: toGradeStyle.color, fontWeight: 'bold' }}>{step.toMaterial}</span>
+                                <span style={{ marginLeft: 'auto', color: toGradeStyle.color, fontWeight: 'bold' }}>x{step.toAmount}</span>
+                              </div>
+
+                              {/* Count Info */}
+                              <span style={{ 
+                                marginLeft: '15px', 
+                                color: 'var(--text-color)', 
+                                fontSize: '1.1rem', 
+                                fontWeight: 'bold',
+                                backgroundColor: 'var(--component-bg)', 
+                                padding: '4px 12px', 
+                                borderRadius: '12px', 
+                                border: '1px solid #ffc107',
+                                boxShadow: '0 0 5px rgba(255, 193, 7, 0.2)'
+                              }}>
+                                {step.count}회
+                              </span>
                             </li>
                           );
                         })}
                       </ul>
+
                     </>
                   ) : (
                     <p className="text-success mb-0">
