@@ -1,4 +1,6 @@
 import { Handler } from '@netlify/functions';
+// @ts-ignore
+import solver from 'javascript-lp-solver';
 
 interface Inventory {
   '아비도스 목재': number;
@@ -27,7 +29,7 @@ export const handler: Handler = async (event) => {
     const body = JSON.parse(event.body || '{}') as RequestBody;
     const { inventory, targetItemName } = body;
     
-    console.log(`[ILP] Request for ${targetItemName}`, inventory);
+    console.log(`[ILP-JS] Request for ${targetItemName}`, inventory);
 
     const recipe = RECIPES[targetItemName];
     if (!recipe) {
@@ -42,98 +44,64 @@ export const handler: Handler = async (event) => {
       P: Math.max(0, inventory['벌목의 가루'] || 0),
     };
 
-    // glpk.js를 동적으로 불러옵니다.
-    // @ts-ignore
-    const glpkImport = await import('glpk.js');
-    const glpk = glpkImport.default;
-    const solver = await glpk();
-    
-    // x: batches, e_XX: exchanges
-    const lp = {
-      name: 'LP',
-      objective: {
-        direction: solver.GLP_MAX,
-        name: 'obj',
-        vars: [{ name: 'x', coef: 1.0 }]
+    /**
+     * javascript-lp-solver 모델 정의
+     * 목적: x (제작 횟수) 최대화
+     * 제약 조건: 각 재료의 소모량이 초기 보유량을 넘지 않아야 함
+     */
+    const model = {
+      optimize: "x",
+      opType: "max",
+      constraints: {
+        timber: { max: inv.A },
+        soft_timber: { max: inv.B },
+        abidos_timber: { max: inv.C },
+        sturdy_timber: { max: inv.S },
+        powder: { max: inv.P }
       },
-      subjectTo: [
-        {
-          name: 'timber',
-          vars: [
-            { name: 'x', coef: recipe.A },
-            { name: 'e_TP', coef: 100 },
-            { name: 'e_ST', coef: -50 },
-            { name: 'e_UT', coef: -50 }
-          ],
-          bnds: { type: solver.GLP_UP, ub: inv.A, lb: 0 }
+      variables: {
+        // x: 제작 횟수 (10개 단위)
+        x: { 
+          timber: recipe.A, 
+          soft_timber: recipe.B, 
+          abidos_timber: recipe.C,
+          x: 1 
         },
-        {
-          name: 'soft_timber',
-          vars: [
-            { name: 'x', coef: recipe.B },
-            { name: 'e_SP', coef: 50 },
-            { name: 'e_ST', coef: 25 },
-            { name: 'e_PS', coef: -50 }
-          ],
-          bnds: { type: solver.GLP_UP, ub: inv.B, lb: 0 }
-        },
-        {
-          name: 'abidos_timber',
-          vars: [
-            { name: 'x', coef: recipe.C },
-            { name: 'e_PA', coef: -10 }
-          ],
-          bnds: { type: solver.GLP_UP, ub: inv.C, lb: 0 }
-        },
-        {
-          name: 'sturdy_timber',
-          vars: [{ name: 'e_UT', coef: 5 }],
-          bnds: { type: solver.GLP_UP, ub: inv.S, lb: 0 }
-        },
-        {
-          name: 'powder',
-          vars: [
-            { name: 'e_PS', coef: 100 },
-            { name: 'e_PA', coef: 100 },
-            { name: 'e_TP', coef: -80 },
-            { name: 'e_SP', coef: -80 }
-          ],
-          bnds: { type: solver.GLP_UP, ub: inv.P, lb: 0 }
-        }
-      ],
-      // Ensure all variables are non-negative
-      bounds: [
-        { name: 'x', type: solver.GLP_LO, lb: 0 },
-        { name: 'e_TP', type: solver.GLP_LO, lb: 0 },
-        { name: 'e_SP', type: solver.GLP_LO, lb: 0 },
-        { name: 'e_PS', type: solver.GLP_LO, lb: 0 },
-        { name: 'e_PA', type: solver.GLP_LO, lb: 0 },
-        { name: 'e_ST', type: solver.GLP_LO, lb: 0 },
-        { name: 'e_UT', type: solver.GLP_LO, lb: 0 }
-      ],
-      generals: ['x', 'e_TP', 'e_SP', 'e_PS', 'e_PA', 'e_ST', 'e_UT']
+        // e_TP: 목재 -> 가루 (100 -> 80)
+        e_TP: { timber: 100, powder: -80 },
+        // e_SP: 부드러운 목재 -> 가루 (50 -> 80)
+        e_SP: { soft_timber: 50, powder: -80 },
+        // e_PS: 가루 -> 부드러운 목재 (100 -> 50)
+        e_PS: { powder: 100, soft_timber: -50 },
+        // e_PA: 가루 -> 아비도스 목재 (100 -> 10)
+        e_PA: { powder: 100, abidos_timber: -10 },
+        // e_ST: 부드러운 목재 -> 목재 (25 -> 50)
+        e_ST: { soft_timber: 25, timber: -50 },
+        // e_UT: 튼튼한 목재 -> 목재 (5 -> 50)
+        e_UT: { sturdy_timber: 5, timber: -50 }
+      },
+      // 모든 변수를 정수(Integer)로 제한하여 ILP 수행
+      ints: { x: 1, e_TP: 1, e_SP: 1, e_PS: 1, e_PA: 1, e_ST: 1, e_UT: 1 }
     };
 
-    const result = solver.solve(lp);
-    console.log(`[ILP] Solver result status: ${result.status}`);
+    const result = solver.Solve(model);
+    console.log(`[ILP-JS] Solver result status: feasible=${result.feasible}`);
 
-    // GLP_OPT: 5, GLP_FEAS: 2
-    if (!result.result || !result.result.vars) {
-      console.warn('[ILP] No feasible solution found');
+    if (!result.feasible) {
+      console.warn('[ILP-JS] No feasible solution found');
       return {
         statusCode: 200,
         body: JSON.stringify({ maxCrafts: 0, exchangeSteps: [], remainingInventory: inventory }),
       };
     }
 
-    const v = result.result.vars;
-    const x = Math.max(0, Math.floor(v.x || 0));
-    const e_TP = Math.max(0, Math.floor(v.e_TP || 0));
-    const e_SP = Math.max(0, Math.floor(v.e_SP || 0));
-    const e_PS = Math.max(0, Math.floor(v.e_PS || 0));
-    const e_PA = Math.max(0, Math.floor(v.e_PA || 0));
-    const e_ST = Math.max(0, Math.floor(v.e_ST || 0));
-    const e_UT = Math.max(0, Math.floor(v.e_UT || 0));
+    const x = Math.max(0, Math.floor(result.x || 0));
+    const e_TP = Math.max(0, Math.floor(result.e_TP || 0));
+    const e_SP = Math.max(0, Math.floor(result.e_SP || 0));
+    const e_PS = Math.max(0, Math.floor(result.e_PS || 0));
+    const e_PA = Math.max(0, Math.floor(result.e_PA || 0));
+    const e_ST = Math.max(0, Math.floor(result.e_ST || 0));
+    const e_UT = Math.max(0, Math.floor(result.e_UT || 0));
 
     const exchangeSteps = [];
     if (e_UT > 0) exchangeSteps.push({ fromMaterial: '튼튼한 목재', fromAmount: 5, toMaterial: '목재', toAmount: 50, count: e_UT });
@@ -151,14 +119,14 @@ export const handler: Handler = async (event) => {
       '벌목의 가루': Math.round(inv.P + (e_TP * 80) + (e_SP * 80) - (e_PS * 100) - (e_PA * 100)),
     };
 
-    console.log(`[ILP] Max crafts calculated: ${x * 10}`);
+    console.log(`[ILP-JS] Max crafts calculated: ${x * 10}`);
 
     return {
       statusCode: 200,
       body: JSON.stringify({ maxCrafts: x * 10, exchangeSteps, remainingInventory }),
     };
   } catch (error) {
-    console.error('[ILP] Solver Error:', error);
+    console.error('[ILP-JS] Solver Error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Internal Server Error', details: String(error) }),

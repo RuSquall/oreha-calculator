@@ -16,6 +16,7 @@
     "buffer": "^6.0.3",
     "glpk.js": "^5.0.0",
     "ioredis": "^5.0.0",
+    "javascript-lp-solver": "^1.0.3",
     "react": "^19.2.4",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.4",
