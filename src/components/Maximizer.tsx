@@ -117,29 +117,47 @@ const Maximizer = () => {
                 </div>
               </Alert.Heading>
               <hr />
-              <p className="mb-3 h4">
-                <strong style={{ color: 'var(--text-color)' }}>최대 {result.maxCrafts / 10}회 ({result.maxCrafts}개) 제작 가능</strong>
-              </p>
-              {result.exchangeSteps.length > 0 && (
+              {result.maxCrafts > 0 ? (
                 <>
-                  <h6 style={{ color: 'var(--text-color)' }}>필요 교환 목록:</h6>
-                  <ul style={{ paddingLeft: '0', listStyleType: 'none' }}>
-                    {result.exchangeSteps.map((step, stepIndex) => {
-                      const fromGradeStyle = getItemGradeStyle(step.fromMaterial, theme);
-                      const toGradeStyle = getItemGradeStyle(step.toMaterial, theme);
-                      return (
-                        <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                          <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.fromMaterial, theme) }} />
-                          <span style={{ marginLeft: '5px', color: fromGradeStyle.color, fontWeight: 'bold' }}>{step.fromMaterial} x{step.fromAmount}</span>
-                          <span style={{ margin: '0 5px' }}> → </span>
-                          <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.toMaterial, theme) }} />
-                          <span style={{ marginLeft: '5px', color: toGradeStyle.color, fontWeight: 'bold' }}>{step.toMaterial} x{step.toAmount}</span>
-                          <span style={{ marginLeft: '5px', color: 'var(--text-color)' }}> (x{step.count}회)</span>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                  <p className="mb-3 h4">
+                    <strong style={{ color: 'var(--text-color)' }}>최대 {result.maxCrafts / 10}회 ({result.maxCrafts}개) 제작 가능</strong>
+                  </p>
+                  {result.exchangeSteps.length > 0 ? (
+                    <>
+                      <h6 style={{ color: 'var(--text-color)' }}>필요 교환 목록:</h6>
+                      <ul style={{ paddingLeft: '0', listStyleType: 'none' }}>
+                        {result.exchangeSteps.map((step, stepIndex) => {
+                          const fromGradeStyle = getItemGradeStyle(step.fromMaterial, theme);
+                          const toGradeStyle = getItemGradeStyle(step.toMaterial, theme);
+                          return (
+                            <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                              <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.fromMaterial, theme) }} />
+                              <span style={{ marginLeft: '5px', color: fromGradeStyle.color, fontWeight: 'bold' }}>{step.fromMaterial} x{step.fromAmount}</span>
+                              <span style={{ margin: '0 5px' }}> → </span>
+                              <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.toMaterial, theme) }} />
+                              <span style={{ marginLeft: '5px', color: toGradeStyle.color, fontWeight: 'bold' }}>{step.toMaterial} x{step.toAmount}</span>
+                              <span style={{ marginLeft: '5px', color: 'var(--text-color)' }}> (x{step.count}회)</span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </>
+                  ) : (
+                    <p className="text-success mb-0">
+                      <i className="bi bi-check-circle-fill me-2"></i>
+                      추가적인 재료 교환 없이 바로 제작할 수 있습니다.
+                    </p>
+                  )}
                 </>
+              ) : (
+                <div className="text-center py-3">
+                  <p className="text-danger h5 mb-0">
+                    현재 보유한 재료로는 제작이 불가능합니다.
+                  </p>
+                  <p className="text-muted small mt-2">
+                    재료를 더 확보하거나 교환 가능한 다른 재료가 있는지 확인해 주세요.
+                  </p>
+                </div>
               )}
               {/* Removed "남는 재료" section */}
             </Alert>
