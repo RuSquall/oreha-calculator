@@ -11,13 +11,13 @@ const calculateUnitSalesFee = (unitPrice: number): number => {
   return Math.ceil(fee);
 };
 
-export const analyzeComprehensiveProfit = (
+export const analyzeComprehensiveProfit = async (
   initialInventory: Inventory,
   pricesPer100: Prices,
   craftFeeReduction: number,
   fusionMaterialMarketPricePer1: number,
   targetItemName: CraftableItem
-): ComprehensiveAnalysisResult => {
+): Promise<ComprehensiveAnalysisResult> => {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const effectiveCosts = getEffectiveCosts(pricesPer100);
@@ -51,7 +51,7 @@ export const analyzeComprehensiveProfit = (
   }
 
   // --- Scenario 2 & 3: Craft Max Items ---
-  const maximizerResult = calculateMaxCrafts(initialInventory, targetItemName);
+  const maximizerResult = await calculateMaxCrafts(initialInventory, targetItemName);
   const maxCrafts = maximizerResult.maxCrafts; // Total single items
   const remainingInventory = maximizerResult.remainingInventory;
   

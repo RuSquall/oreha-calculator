@@ -14,6 +14,7 @@
     "@types/react-dom": "^19.2.3",
     "bootstrap": "^5.3.8",
     "buffer": "^6.0.3",
+    "glpk.js": "^5.0.0",
     "ioredis": "^5.0.0",
     "react": "^19.2.4",
     "react-bootstrap": "^2.10.10",

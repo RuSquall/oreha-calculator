@@ -18,6 +18,7 @@ const Maximizer = () => {
 
   const [inventory, setInventory] = useState<Inventory>(defaultInventory);
   const [results, setResults] = useState<MaximizerResult[]>(initialResults);
+  const [isCalculating, setIsCalculating] = useState(false);
 
   const handleInventoryChange = (name: MaterialName, value: string) => {
     setInventory({
@@ -31,12 +32,19 @@ const Maximizer = () => {
     setResults(initialResults); // 결과도 함께 초기화
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const allResults: MaximizerResult[] = RECIPES.map(recipe => {
-      return calculateMaxCrafts(inventory, recipe.name);
-    });
-    setResults(allResults);
+    setIsCalculating(true);
+    try {
+      const allResults: MaximizerResult[] = await Promise.all(
+        RECIPES.map(recipe => calculateMaxCrafts(inventory, recipe.name))
+      );
+      setResults(allResults);
+    } catch (error) {
+      console.error('Calculation failed:', error);
+    } finally {
+      setIsCalculating(false);
+    }
   };
 
   return (
@@ -83,8 +91,8 @@ const Maximizer = () => {
               </Row>
               
               <div className="d-grid mt-4">
-                <Button variant="primary" size="lg" type="submit">
-                  최대 생산량 계산
+                <Button variant="primary" size="lg" type="submit" disabled={isCalculating}>
+                  {isCalculating ? '계산 중...' : '최대 생산량 계산'}
                 </Button>
               </div>
             </Form>

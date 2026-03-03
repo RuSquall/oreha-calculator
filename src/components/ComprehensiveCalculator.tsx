@@ -82,7 +82,14 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
     });
   };
 
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
   const runAnalysis = useCallback(async () => {
+    setIsAnalyzing(true);
+    // Simulate a small delay for better UX if it's too fast, 
+    // and to prepare for future network calls.
+    await new Promise(resolve => setTimeout(resolve, 300));
+
     const fullPrices = PURCHASABLE_MATERIALS.reduce((acc, name) => {
         acc[name] = prices[name] || 0;
         return acc;
@@ -98,13 +105,17 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
       );
     });
     setResults(await Promise.all(allResults));
-  }, [inventory, prices, craftFeeDiscount, fusionMaterialPrices]); // Dependencies for useCallback
+    setIsAnalyzing(false);
+  }, [inventory, prices, craftFeeDiscount, fusionMaterialPrices]);
 
+  // Removed: Auto-run on price/inventory changes
+  /*
   useEffect(() => {
     if (Object.keys(prices).length > 0) {
       runAnalysis();
     }
-  }, [runAnalysis, prices]); // Call runAnalysis whenever its dependencies change
+  }, [runAnalysis, prices]);
+  */
 
   return (
     <Row> {/* Main Row for two-column layout */}
@@ -272,6 +283,22 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
                   );
                 })}
               </Row>
+
+              <div className="d-grid mt-4">
+                <Button 
+                  variant="primary" 
+                  size="lg" 
+                  onClick={runAnalysis}
+                  disabled={isAnalyzing || isLoading}
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Spinner animation="border" size="sm" className="me-2" />
+                      분석 중...
+                    </>
+                  ) : '종합 분석 실행'}
+                </Button>
+              </div>
 
               </Form>
           </Card.Body>
