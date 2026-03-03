@@ -344,13 +344,23 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
                         <h6 className="small" style={{ color: 'var(--text-color)' }}>제작/판매 시 필요 교환:</h6>
                         <ul className="small text-muted" style={{ paddingLeft: '0', listStyleType: 'none' }}>
                           {result.craftSellExchangeSteps.map((step, stepIndex) => (
-                            <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                              <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.fromMaterial, theme) }} />
-                              <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.fromMaterial, theme).color }}>{step.fromMaterial} x{step.fromAmount}</span>
-                              <span style={{ margin: '0 5px' }}> → </span>
-                              <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '20px', height: '20px', ...getImageBackgroundStyle(step.toMaterial, theme) }} />
-                              <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.toMaterial, theme).color }}>{step.toMaterial} x{step.toAmount}</span>
-                              <span style={{ marginLeft: '5px', color: 'var(--text-color)' }}> (x{step.count}회)</span>
+                            <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', fontSize: '1.1rem' }}>
+                              <OverlayTrigger
+                                placement="top"
+                                overlay={<Tooltip id={`tooltip-from-${stepIndex}`}>{step.fromMaterial}</Tooltip>}
+                              >
+                                <img src={getImagePath(step.fromMaterial)} alt={step.fromMaterial} style={{ width: '32px', height: '32px', ...getImageBackgroundStyle(step.fromMaterial, theme) }} />
+                              </OverlayTrigger>
+                              <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.fromMaterial, theme).color, fontWeight: 'bold' }}>x{step.fromAmount}</span>
+                              <span style={{ margin: '0 8px', fontWeight: 'bold' }}> → </span>
+                              <OverlayTrigger
+                                placement="top"
+                                overlay={<Tooltip id={`tooltip-to-${stepIndex}`}>{step.toMaterial}</Tooltip>}
+                              >
+                                <img src={getImagePath(step.toMaterial)} alt={step.toMaterial} style={{ width: '32px', height: '32px', ...getImageBackgroundStyle(step.toMaterial, theme) }} />
+                              </OverlayTrigger>
+                              <span style={{ marginLeft: '5px', color: getItemGradeStyle(step.toMaterial, theme).color, fontWeight: 'bold' }}>x{step.toAmount}</span>
+                              <span style={{ marginLeft: '8px', color: 'var(--text-color)', fontSize: '0.9rem', opacity: 0.8 }}> ({step.count}회)</span>
                             </li>
                           ))}
                         </ul>
