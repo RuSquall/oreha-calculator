@@ -357,7 +357,7 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
                               </div>
 
                               {/* Strong Arrow */}
-                              <span style={{ margin: '0 12px', color: '#0d6efd', fontWeight: '900', fontSize: '1.3rem' }}> → </span>
+                              <span style={{ margin: '0 12px', color: '#ffc107', fontWeight: '900', fontSize: '1.4rem' }}> → </span>
 
                               {/* To Material Group */}
                               <div style={{ display: 'flex', alignItems: 'center', width: '80px' }}>
@@ -371,7 +371,17 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
                               </div>
 
                               {/* Count Info */}
-                              <span style={{ marginLeft: '12px', color: 'var(--text-color)', fontSize: '0.85rem', backgroundColor: 'var(--component-bg)', padding: '2px 8px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                              <span style={{ 
+                                marginLeft: '12px', 
+                                color: 'var(--text-color)', 
+                                fontSize: '1rem', 
+                                fontWeight: 'bold',
+                                backgroundColor: 'var(--component-bg)', 
+                                padding: '3px 10px', 
+                                borderRadius: '12px', 
+                                border: '1px solid #ffc107',
+                                boxShadow: '0 0 5px rgba(255, 193, 7, 0.2)'
+                              }}>
                                 {step.count}회
                               </span>
                             </li>
