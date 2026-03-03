@@ -46,11 +46,11 @@ export const handler: Handler = async (event) => {
 
     /**
      * javascript-lp-solver 모델 정의
-     * 목적: x (제작 횟수) 최대화
-     * 제약 조건: 각 재료의 소모량이 초기 보유량을 넘지 않아야 함
+     * 목적: x (제작 횟수) 최대화 및 불필요한 교환 최소화
+     * 벌점(-0.0001)을 주어 동일한 x일 경우 교환 횟수가 적은 해를 선택하도록 유도
      */
     const model = {
-      optimize: "x",
+      optimize: "profit",
       opType: "max",
       constraints: {
         timber: { max: inv.A },
@@ -60,31 +60,22 @@ export const handler: Handler = async (event) => {
         powder: { max: inv.P }
       },
       variables: {
-        // x: 제작 횟수 (10개 단위)
         x: { 
           timber: recipe.A, 
           soft_timber: recipe.B, 
           abidos_timber: recipe.C,
-          x: 1 
+          profit: 1 // 제작 횟수당 이득 1
         },
-        // e_TP: 목재 -> 가루 (100 -> 80)
-        e_TP: { timber: 100, powder: -80 },
-        // e_SP: 부드러운 목재 -> 가루 (50 -> 80)
-        e_SP: { soft_timber: 50, powder: -80 },
-        // e_PS: 가루 -> 부드러운 목재 (100 -> 50)
-        e_PS: { powder: 100, soft_timber: -50 },
-        // e_PA: 가루 -> 아비도스 목재 (100 -> 10)
-        e_PA: { powder: 100, abidos_timber: -10 },
-        // e_ST: 부드러운 목재 -> 목재 (25 -> 50)
-        e_ST: { soft_timber: 25, timber: -50 },
-        // e_UT: 튼튼한 목재 -> 목재 (5 -> 50)
-        e_UT: { sturdy_timber: 5, timber: -50 }
+        e_TP: { timber: 100, powder: -80, profit: -0.0001 },
+        e_SP: { soft_timber: 50, powder: -80, profit: -0.0001 },
+        e_PS: { powder: 100, soft_timber: -50, profit: -0.0001 },
+        e_PA: { powder: 100, abidos_timber: -10, profit: -0.0001 },
+        e_ST: { soft_timber: 25, timber: -50, profit: -0.0001 },
+        e_UT: { sturdy_timber: 5, timber: -50, profit: -0.0001 }
       },
-      // 모든 변수를 정수(Integer)로 제한하여 ILP 수행
       ints: { x: 1, e_TP: 1, e_SP: 1, e_PS: 1, e_PA: 1, e_ST: 1, e_UT: 1 }
     };
 
-    // 정밀도를 높여서 최적해를 더 정확하게 찾도록 합니다.
     const result = solver.Solve(model, 1e-9);
     console.log(`[ILP-JS] Solver result status: feasible=${result.feasible}`);
 
@@ -97,6 +88,19 @@ export const handler: Handler = async (event) => {
     }
 
     const x = Math.max(0, Math.floor(result.x || 0));
+
+    // 제작 횟수가 0이면 아무런 교환도 제안하지 않음
+    if (x === 0) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          maxCrafts: 0,
+          exchangeSteps: [],
+          remainingInventory: inventory,
+        }),
+      };
+    }
+
     const e_TP = Math.max(0, Math.floor(result.e_TP || 0));
     const e_SP = Math.max(0, Math.floor(result.e_SP || 0));
     const e_PS = Math.max(0, Math.floor(result.e_PS || 0));
