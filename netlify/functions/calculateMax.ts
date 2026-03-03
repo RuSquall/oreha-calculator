@@ -1,6 +1,4 @@
 import { Handler } from '@netlify/functions';
-// @ts-ignore
-import glpk from 'glpk.js';
 
 interface Inventory {
   '아비도스 목재': number;
@@ -44,6 +42,10 @@ export const handler: Handler = async (event) => {
       P: Math.max(0, inventory['벌목의 가루'] || 0),
     };
 
+    // glpk.js를 동적으로 불러옵니다.
+    // @ts-ignore
+    const glpkImport = await import('glpk.js');
+    const glpk = glpkImport.default;
     const solver = await glpk();
     
     // x: batches, e_XX: exchanges
