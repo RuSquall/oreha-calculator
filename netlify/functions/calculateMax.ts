@@ -84,7 +84,8 @@ export const handler: Handler = async (event) => {
       ints: { x: 1, e_TP: 1, e_SP: 1, e_PS: 1, e_PA: 1, e_ST: 1, e_UT: 1 }
     };
 
-    const result = solver.Solve(model);
+    // 정밀도를 높여서 최적해를 더 정확하게 찾도록 합니다.
+    const result = solver.Solve(model, 1e-9);
     console.log(`[ILP-JS] Solver result status: feasible=${result.feasible}`);
 
     if (!result.feasible) {
