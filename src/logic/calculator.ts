@@ -74,14 +74,19 @@ export const analyzeCraftingProfit = (
   const fusionMaterialPriceFor10 = fusionMaterialMarketPricePer1 * 10;
 
   // Value from selling materials (for reference)
-  let totalSalesFeeForMaterials = 0;
+  let valueFromSellingMaterials = 0;
   for (const material in recipe.materials) {
     const requiredMaterialName = material as MaterialName;
     const requiredAmount = recipe.materials[requiredMaterialName]!;
-    const marketValuePerUnit = effectiveCosts[requiredMaterialName].price;
-    totalSalesFeeForMaterials += calculateUnitSalesFee(marketValuePerUnit) * requiredAmount;
+    const pricePer100 = pricesPer100[requiredMaterialName] || 0;
+    
+    // Net per 100 = Price - 5% Fee
+    const salesFeePer100 = Math.ceil(pricePer100 * 0.05);
+    const netValuePer100 = pricePer100 - salesFeePer100;
+    const netValuePerUnit = netValuePer100 / 100;
+    
+    valueFromSellingMaterials += netValuePerUnit * requiredAmount;
   }
-  const valueFromSellingMaterials = materialCostFor10Crafts - totalSalesFeeForMaterials;
 
   // Profit from crafting and selling
   const unitSalesFeeForCrafted = calculateUnitSalesFee(fusionMaterialMarketPricePer1);

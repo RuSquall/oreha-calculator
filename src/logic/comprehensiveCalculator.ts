@@ -41,11 +41,13 @@ export const analyzeComprehensiveProfit = async (
     const count = initialInventory[materialName] || 0;
     if (count === 0) continue;
 
-    const marketValuePerUnit = (pricesPer100[materialName] || 0) / 100;
-    if (marketValuePerUnit === 0) continue; // Cannot sell if market price is 0
+    const pricePer100 = pricesPer100[materialName] || 0;
+    if (pricePer100 === 0) continue;
 
-    const unitSalesFee = calculateUnitSalesFee(marketValuePerUnit);
-    const netValuePerUnit = marketValuePerUnit - unitSalesFee;
+    // Calculate net value per 100 units (Market Price - 5% Fee)
+    const salesFeePer100 = Math.ceil(pricePer100 * 0.05);
+    const netValuePer100 = pricePer100 - salesFeePer100;
+    const netValuePerUnit = netValuePer100 / 100;
     
     totalValueSellAll += netValuePerUnit * count;
   }
@@ -66,11 +68,12 @@ export const analyzeComprehensiveProfit = async (
     const count = remainingInventory[materialName] || 0;
     if (count === 0) continue;
 
-    const marketValuePerUnit = (pricesPer100[materialName] || 0) / 100;
-    if (marketValuePerUnit === 0) continue;
+    const pricePer100 = pricesPer100[materialName] || 0;
+    if (pricePer100 === 0) continue;
 
-    const unitSalesFee = calculateUnitSalesFee(marketValuePerUnit);
-    const netValuePerUnit = marketValuePerUnit - unitSalesFee;
+    const salesFeePer100 = Math.ceil(pricePer100 * 0.05);
+    const netValuePer100 = pricePer100 - salesFeePer100;
+    const netValuePerUnit = netValuePer100 / 100;
     
     valueFromSellingRemaining += netValuePerUnit * count;
   }
