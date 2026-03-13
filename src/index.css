@@ -108,3 +108,10 @@ footer a:hover {
   color: var(--footer-link-hover-color);
   text-decoration: underline; /* Add underline on hover */
 }
+
+/* Tooltip width adjustment */
+.tooltip-inner {
+    max-width: 1000px !important; /* Allow up to 1000px */
+    text-align: left; /* Default tooltips to left-aligned text */
+    padding: 10px 15px;
+}

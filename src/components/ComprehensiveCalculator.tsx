@@ -117,6 +117,16 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
   }, [runAnalysis, prices]);
   */
 
+  const resultTooltip = (
+    <Tooltip id="result-calculation-tooltip" style={{ maxWidth: '1000px' }}>
+      <div style={{ textAlign: 'left' }}>
+        <strong>• 직접 판매:</strong> 보유 재료를 경매장에 모두 팔았을 때의 기대 수익 (수수료 5% 포함)<br/>
+        <strong>• 제작 후 판매:</strong> 재료를 최적의 경로로 교환/제작하여 팔았을 때의 기대 수익 (수수료 5% 포함)<br/>
+        <strong>• 제작 후 사용:</strong> 제작한 아이템을 직접 사용할 때, 경매장 구매 대비 절약되는 총 가치
+      </div>
+    </Tooltip>
+  );
+
   return (
     <Row> {/* Main Row for two-column layout */}
       <Col md={8}> {/* Left column for input form */}
@@ -317,6 +327,14 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
                   <span style={{ marginLeft: '8px', color: titleGradeStyle.color, fontWeight: 'bold' }}>
                     {result.message === '선택된 제작 아이템을 찾을 수 없습니다.' ? '종합 분석 결과' : `${recipeName} 종합 분석 결과`}
                   </span>
+                  <OverlayTrigger placement="top" overlay={resultTooltip}>
+                    <img 
+                      src="/qm_1b1.png" 
+                      alt="산출 방식 도움말" 
+                      style={{ width: '18px', height: '18px', cursor: 'help', verticalAlign: 'middle', marginBottom: '3px' }} 
+                      className="ms-1" 
+                    />
+                  </OverlayTrigger>
                 </div>
                 <hr />
                 {result.recommendation === '오류' ? (
@@ -337,11 +355,10 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
                     </p>
                     <hr />
                     <p className="mb-0 small" style={{ color: 'var(--text-color)' }}>
-                      * 최대 제작 가능 융화재료: {result.maxCraftsPossible / 10}회 ({result.maxCraftsPossible}개)
+                      최대 제작 시 {result.maxCraftsPossible / 10}회({result.maxCraftsPossible}개)
                     </p>
                     {result.craftSellExchangeSteps.length > 0 && (
                       <div className="mt-2">
-                        <h6 className="small" style={{ color: 'var(--text-color)' }}>제작/판매 시 필요 교환:</h6>
                         <ul className="small text-muted" style={{ paddingLeft: '0', listStyleType: 'none' }}>
                           {result.craftSellExchangeSteps.map((step, stepIndex) => (
                             <li key={stepIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', fontSize: '1.1rem' }}>
