@@ -342,16 +342,21 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
                 ) : (
                   <>
                     <p className="mb-2" style={{ color: 'var(--text-color)' }}>
-                      <strong>최적 추천:</strong> <strong className="text-primary">{result.recommendation}</strong>
+                      <strong>직접 판매:</strong> <strong className="text-warning">{result.totalValueSellAll.toLocaleString()} G</strong>
                     </p>
                     <p className="mb-2" style={{ color: 'var(--text-color)' }}>
-                      모든 재료 직접 판매 시 총 가치: <strong className="text-warning">{result.totalValueSellAll.toLocaleString()} 골드</strong>
+                      <strong>제작 후 판매:</strong> <strong className="text-success">{result.totalValueCraftSell.toLocaleString()} G</strong>
+                      <span className="ms-2 small" style={{ color: result.totalValueCraftSell >= result.totalValueSellAll ? '#28a745' : '#dc3545' }}>
+                        ({(result.totalValueCraftSell - result.totalValueSellAll) > 0 ? '+' : ''}{(result.totalValueCraftSell - result.totalValueSellAll).toLocaleString()} G, 
+                        {result.totalValueSellAll > 0 ? (((result.totalValueCraftSell - result.totalValueSellAll) / result.totalValueSellAll) * 100).toFixed(1) : '0.0'}%)
+                      </span>
                     </p>
                     <p className="mb-2" style={{ color: 'var(--text-color)' }}>
-                      최대 제작 후 판매 시 총 가치: <strong className="text-success">{result.totalValueCraftSell.toLocaleString()} 골드</strong>
-                    </p>
-                    <p className="mb-2" style={{ color: 'var(--text-color)' }}>
-                      최대 제작 후 직접 사용 시 총 가치: <strong className="text-info">{result.totalValueCraftUse.toLocaleString()} 골드</strong>
+                      <strong>제작 후 사용:</strong> <strong className="text-info">{result.totalValueCraftUse.toLocaleString()} G</strong>
+                      <span className="ms-2 small" style={{ color: result.totalValueCraftUse >= result.totalValueSellAll ? '#17a2b8' : '#dc3545' }}>
+                        ({(result.totalValueCraftUse - result.totalValueSellAll) > 0 ? '+' : ''}{(result.totalValueCraftUse - result.totalValueSellAll).toLocaleString()} G, 
+                        {result.totalValueSellAll > 0 ? (((result.totalValueCraftUse - result.totalValueSellAll) / result.totalValueSellAll) * 100).toFixed(1) : '0.0'}%)
+                      </span>
                     </p>
                     <hr />
                     <p className="mb-0 small" style={{ color: 'var(--text-color)' }}>
