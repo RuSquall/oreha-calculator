@@ -87,7 +87,12 @@ function App() {
           </Tooltip>
         }
       >
-        <span style={{ cursor: 'help' }} className="ms-1"> 🤔 </span>
+        <img 
+          src="/qm_1b1.png" 
+          alt="도움말" 
+          style={{ width: '20px', height: '20px', cursor: 'help', verticalAlign: 'middle', marginBottom: '4px' }} 
+          className="ms-1" 
+        />
       </OverlayTrigger>
     </span>
   );
@@ -103,7 +108,12 @@ function App() {
           </Tooltip>
         }
       >
-        <span style={{ cursor: 'help' }} className="ms-1"> 🤔 </span>
+        <img 
+          src="/qm_1b1.png" 
+          alt="도움말" 
+          style={{ width: '20px', height: '20px', cursor: 'help', verticalAlign: 'middle', marginBottom: '4px' }} 
+          className="ms-1" 
+        />
       </OverlayTrigger>
     </span>
   );

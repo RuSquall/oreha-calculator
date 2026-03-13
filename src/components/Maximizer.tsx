@@ -177,11 +177,8 @@ const Maximizer = () => {
                 </>
               ) : (
                 <div className="text-center py-3">
-                  <p className="text-danger h5 mb-0">
+                  <p className="h5 mb-0" style={{ color: '#fff' }}>
                     현재 보유한 재료로는 제작이 불가능합니다.
-                  </p>
-                  <p className="text-muted small mt-2">
-                    재료를 더 확보하거나 교환 가능한 다른 재료가 있는지 확인해 주세요.
                   </p>
                 </div>
               )}
