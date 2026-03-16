@@ -347,14 +347,14 @@ const ComprehensiveCalculator: React.FC<ComprehensiveCalculatorProps> = ({ apiDa
                     <p className="mb-2" style={{ color: 'var(--text-color)' }}>
                       <strong>제작 후 판매:</strong> <strong className="text-success">{result.totalValueCraftSell.toLocaleString()} G</strong>
                       <span className="ms-2 small" style={{ color: result.totalValueCraftSell >= result.totalValueSellAll ? '#28a745' : '#dc3545' }}>
-                        ({(result.totalValueCraftSell - result.totalValueSellAll) > 0 ? '+' : ''}{(result.totalValueCraftSell - result.totalValueSellAll).toLocaleString()} G, 
+                        ({(result.totalValueCraftSell - result.totalValueSellAll) > 0 ? '+' : ''}{(result.totalValueCraftSell - result.totalValueSellAll).toLocaleString()} G,  {' '}
                         {result.totalValueSellAll > 0 ? (((result.totalValueCraftSell - result.totalValueSellAll) / result.totalValueSellAll) * 100).toFixed(1) : '0.0'}%)
                       </span>
                     </p>
                     <p className="mb-2" style={{ color: 'var(--text-color)' }}>
                       <strong>제작 후 사용:</strong> <strong className="text-info">{result.totalValueCraftUse.toLocaleString()} G</strong>
                       <span className="ms-2 small" style={{ color: result.totalValueCraftUse >= result.totalValueSellAll ? '#17a2b8' : '#dc3545' }}>
-                        ({(result.totalValueCraftUse - result.totalValueSellAll) > 0 ? '+' : ''}{(result.totalValueCraftUse - result.totalValueSellAll).toLocaleString()} G, 
+                        ({(result.totalValueCraftUse - result.totalValueSellAll) > 0 ? '+' : ''}{(result.totalValueCraftUse - result.totalValueSellAll).toLocaleString()} G,  {' '}
                         {result.totalValueSellAll > 0 ? (((result.totalValueCraftUse - result.totalValueSellAll) / result.totalValueSellAll) * 100).toFixed(1) : '0.0'}%)
                       </span>
                     </p>
