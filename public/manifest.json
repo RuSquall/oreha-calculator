@@ -1,19 +1,16 @@
 {
   "short_name": "로아 융화 계산기",
   "name": "로스트아크 융화 재료 계산기",
+  "description": "로스트아크 융화 재료 제작 수익, 최대 생산량, 재료 교환 경로 분석",
+  "lang": "ko-KR",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "logo192.png",
+      "src": "상급_아비도스_융화_재료.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "logo512.png",
+      "src": "상급_아비도스_융화_재료.png",
       "type": "image/png",
       "sizes": "512x512"
     }
@@ -21,5 +18,5 @@
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#121212"
 }
